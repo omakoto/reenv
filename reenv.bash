@@ -1,3 +1,4 @@
+# Reenv: https://github.com/omakoto/reenv
 
 function _reenv_maybe_usage() {
     if ! [[ "$1" == "-h" || "$1" == "--help" ]] ; then
@@ -34,7 +35,7 @@ _reenv_clear
 # Detect if a variable (or function) name should be skipped.
 function _reenv_skip() {
     local name="$1"
-    [[ "$name" =~ ^(_reenv|BASH|FUNCNAME$|RANDOM$|SRANDOM$|EPOCHREALTIME$|EPOCHSECONDS$|SECONDS$|USER$|PWD$|_$) ]]
+    [[ "$name" =~ ^(reenv|_reenv|BASH|FUNCNAME$|RANDOM$|SRANDOM$|EPOCHREALTIME$|EPOCHSECONDS$|SECONDS$|USER$|PWD$|_$) ]]
 }
 
 # Dump all variables and functions
@@ -42,9 +43,7 @@ function _reenv_dump() {
     {
         compgen -v | while read -r name; do
             # Skip certain variables
-            if _reenv_skip "$name" ; then
-                continue
-            fi
+            _reenv_skip "$name" && continue
             echo "#$name"
             declare -p "$name"
             echo -ne '\0'
@@ -52,9 +51,7 @@ function _reenv_dump() {
 
         # functions
         compgen -A function | while read -r name; do
-            if _reenv_skip "$name" ; then
-                continue
-            fi
+            _reenv_skip "$name" && continue
             echo "#$name()"
             declare -p -f "$name"
             echo -ne '\0'
@@ -66,9 +63,7 @@ function _reenv_dump() {
 function _reenv_dump_unset() {
     {
         compgen -v | while read -r name; do
-            if _reenv_skip "$name" ; then
-                continue
-            fi
+            _reenv_skip "$name" && continue
             # Use double quotes just so it's easier to write the expected
             # text in tests.
             printf "unset -v \"%s\"\n\0" "$name"
@@ -76,9 +71,7 @@ function _reenv_dump_unset() {
 
         # functions
         compgen -A function | while read -r name; do
-            if _reenv_skip "$name" ; then
-                continue
-            fi
+            _reenv_skip "$name" && continue
             printf "unset -f \"%s\"\n\0" "$name"
         done
     } | LC_ALL=C sort -z
@@ -111,6 +104,3 @@ function reenv-cap() {
     # Dump added or changed variables and functions
     LC_ALL=C comm -13 -z "$_reenv_file_base" "$_reenv_file_current" | tr -d '\0'
 }
-
-
-

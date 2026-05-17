@@ -218,19 +218,19 @@ bash -c "func4"
 unset -f "func1"
 unset -v "var1"
 #func2()
-func2 () 
-{ 
+func2 ()
+{
     echo not ok
 }
 declare -fx func2
 #func3()
-func3 () 
-{ 
+func3 ()
+{
     echo not ok
 }
 #func4()
-func4 () 
-{ 
+func4 ()
+{
     echo not ok
 }
 declare -fx func4
@@ -245,19 +245,19 @@ declare -- var3="ccc"
 unset -f "func1"
 unset -v "var1"
 #func2()
-func2 () 
-{ 
+func2 ()
+{
     echo not ok
 }
 declare -fx func2
 #func3()
-func3 () 
-{ 
+func3 ()
+{
     echo not ok
 }
 #func4()
-func4 () 
-{ 
+func4 ()
+{
     echo not ok
 }
 declare -fx func4
@@ -276,6 +276,63 @@ Calling func2 (unexported)
 bash: line 1: func3: command not found
 Calling func4 (exported in subshell)
 not ok
+'
+
+# ==========================================================
+test "Help" '
+reenv-base -h
+echo $?
+reenv-base --help
+echo $?
+reenv-cap -h
+echo $?
+reenv-cap --help
+echo $?
+# ----- end of eval -----
+' '
+Reenv
+
+Reenv tracks changes to the shell environment (variables and functions)
+between two points in time and emits them as sourceable bash code.
+This lets you capture environment changes made in one shell (or subshell)
+and replay them in another.
+
+See https://github.com/omakoto/reenv for more details.
+
+1
+
+Reenv
+
+Reenv tracks changes to the shell environment (variables and functions)
+between two points in time and emits them as sourceable bash code.
+This lets you capture environment changes made in one shell (or subshell)
+and replay them in another.
+
+See https://github.com/omakoto/reenv for more details.
+
+1
+
+Reenv
+
+Reenv tracks changes to the shell environment (variables and functions)
+between two points in time and emits them as sourceable bash code.
+This lets you capture environment changes made in one shell (or subshell)
+and replay them in another.
+
+See https://github.com/omakoto/reenv for more details.
+
+1
+
+Reenv
+
+Reenv tracks changes to the shell environment (variables and functions)
+between two points in time and emits them as sourceable bash code.
+This lets you capture environment changes made in one shell (or subshell)
+and replay them in another.
+
+See https://github.com/omakoto/reenv for more details.
+
+1
 '
 
 
