@@ -56,7 +56,7 @@ function _reenv_dump() {
                 continue
             fi
             echo "#$name()"
-            declare -f "$name"
+            declare -p -f "$name"
             echo -ne '\0'
         done
     } | LC_ALL=C sort -z

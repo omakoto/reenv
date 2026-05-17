@@ -25,10 +25,10 @@ function test() {
         echo "PASSED"
     else
         (( ++num_failure))
-        echo "FAILED! Actual:"
-        echo "------------"
+        echo "FAILED! Actual result:"
+        echo "#################################################################"
         echo "$actual"
-        echo "------------"
+        echo "#################################################################"
     fi
 }
 
@@ -167,15 +167,15 @@ echo $?
     function func2() { echo not ok; }
     function func3() { echo not ok; }
 
-    # Export a new function
-    # BUG: This will be in the delta, but it will not be
-    # exported.
+    # Export a new function.
     function func4() { echo not ok; }
     export -f func4
 
     reenv-cap > /tmp/reenv-test.sh
+    echo "--- Delta in subshell START ---"
     cat /tmp/reenv-test.sh
     echo $?
+    echo "--- Delta in subshell END ---"
 )
 
 echo "# Capture again, which should be empty"
@@ -208,14 +208,13 @@ bash -c "func2"
 echo "Calling func2 (unexported)"
 bash -c "func3"
 
-
-# Func 4 was a new method in subshell and was exported,
-# so it should be visible from child procs, but it will not, for now.
+# Func 4 was a new function in subshell and was exported,
 echo "Calling func4 (exported in subshell)"
 bash -c "func4"
 # ----- end of eval -----
 ' '0
 # Capture in subshell!
+--- Delta in subshell START ---
 unset -f "func1"
 unset -v "var1"
 #func2()
@@ -223,6 +222,7 @@ func2 ()
 { 
     echo not ok
 }
+declare -fx func2
 #func3()
 func3 () 
 { 
@@ -233,9 +233,11 @@ func4 ()
 { 
     echo not ok
 }
+declare -fx func4
 #var3
 declare -- var3="ccc"
 0
+--- Delta in subshell END ---
 # Capture again, which should be empty
 0
 # Apply again!
@@ -247,6 +249,7 @@ func2 ()
 { 
     echo not ok
 }
+declare -fx func2
 #func3()
 func3 () 
 { 
@@ -257,6 +260,7 @@ func4 ()
 { 
     echo not ok
 }
+declare -fx func4
 #var3
 declare -- var3="ccc"
 0
@@ -271,7 +275,7 @@ not ok
 Calling func2 (unexported)
 bash: line 1: func3: command not found
 Calling func4 (exported in subshell)
-bash: line 1: func4: command not found
+not ok
 '
 
 
