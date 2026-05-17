@@ -19,7 +19,7 @@ function test() {
     local actual="$(eval "$run" 2>&1)"
     rc=$?
 
-    diff -c <(echo "$expected") <(echo "$actual")
+    diff -Z -c <(echo -n "$expected") <(echo -n "$actual")
     rc=$?
     if (( $rc == 0 )); then
         echo "PASSED"
@@ -46,7 +46,8 @@ echo $?
 reenv-cap
 echo $?
 ' '0
-0'
+0
+'
 
 # ==========================================================
 test "Basic env change" '
@@ -61,6 +62,7 @@ changed=new
 
 reenv-cap
 echo $?
+# ----- end of eval -----
 ' '0
 #XXX
 declare -x XXX="xyz def"
@@ -68,7 +70,8 @@ declare -x XXX="xyz def"
 declare -- aaa="abc"
 #changed
 declare -- changed="new"
-0'
+0
+'
 
 # ==========================================================
 test "Basic env and func change" '
@@ -84,6 +87,7 @@ var=xxx
 
 reenv-cap
 echo $?
+# ----- end of eval -----
 ' '0
 #a()
 a () 
@@ -97,7 +101,8 @@ b ()
 }
 #var
 declare -- var="xxx"
-0'
+0
+'
 
 # ==========================================================
 test "Deletion" '
@@ -118,6 +123,7 @@ function func2() { echo not ok; }
 function func3() { echo not ok; }
 reenv-cap
 echo $?
+# ----- end of eval -----
 ' '0
 unset -f "func1"
 unset -v "var1"
@@ -133,7 +139,8 @@ func3 ()
 }
 #var3
 declare -- var3="ccc"
-0'
+0
+'
 
 # ==========================================================
 test "Actually apply" '
@@ -142,6 +149,10 @@ var1=aaa
 var2=bbb
 function func1() { echo ok; }
 function func2() { echo ok; }
+
+# Also try exporing the functions
+export -f func1
+export -f func2
 
 reenv-base
 echo $?
@@ -173,6 +184,14 @@ echo $?
 reenv-cap
 echo $?
 
+# Try calling func2 and func3
+echo "Calling func2"
+func2
+
+echo "Calling func3"
+func3
+
+# ----- end of eval -----
 ' '0
 # Capture in subshell!
 unset -f "func1"
@@ -208,7 +227,12 @@ func3 ()
 }
 #var3
 declare -- var3="ccc"
-0'
+0
+Calling func2
+not ok
+Calling func3
+not ok
+'
 
 
 
