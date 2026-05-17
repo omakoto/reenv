@@ -1,11 +1,22 @@
-# Reenv
-#
-# Reenv tracks changes to the shell environment (variables and functions)
-# between two points in time and emits them as sourceable bash code.
-# This lets you capture environment changes made in one shell (or subshell)
-# and replay them in another.
-#
-# See https://github.com/omakoto/reenv for more details.
+
+function _reenv_maybe_usage() {
+    if ! [[ "$1" == "-h" || "$1" == "--help" ]] ; then
+        return 1
+    fi
+    cat <<'EOF'
+
+Reenv
+
+Reenv tracks changes to the shell environment (variables and functions)
+between two points in time and emits them as sourceable bash code.
+This lets you capture environment changes made in one shell (or subshell)
+and replay them in another.
+
+See https://github.com/omakoto/reenv for more details.
+
+EOF
+    return 0
+}
 
 
 _reenv_file_base="${_reenv_file_base:-$(mktemp --suffix _reenv)}"
@@ -20,10 +31,10 @@ function _reenv_clear() {
 _reenv_clear
 
 
-# Detect if a (variable) name should be skipped.
+# Detect if a variable (or function) name should be skipped.
 function _reenv_skip() {
     local name="$1"
-    [[ "$name" =~ ^(BASH|FUNCNAME$|RANDOM$|SRANDOM$|EPOCHREALTIME$|EPOCHSECONDS$|SECONDS$|USER$|PWD$|_$) ]]
+    [[ "$name" =~ ^(_reenv|BASH|FUNCNAME$|RANDOM$|SRANDOM$|EPOCHREALTIME$|EPOCHSECONDS$|SECONDS$|USER$|PWD$|_$) ]]
 }
 
 # Dump all variables and functions
@@ -41,6 +52,9 @@ function _reenv_dump() {
 
         # functions
         compgen -A function | while read -r name; do
+            if _reenv_skip "$name" ; then
+                continue
+            fi
             echo "#$name()"
             declare -f "$name"
             echo -ne '\0'
@@ -62,6 +76,9 @@ function _reenv_dump_unset() {
 
         # functions
         compgen -A function | while read -r name; do
+            if _reenv_skip "$name" ; then
+                continue
+            fi
             printf "unset -f \"%s\"\n\0" "$name"
         done
     } | LC_ALL=C sort -z
@@ -69,6 +86,8 @@ function _reenv_dump_unset() {
 
 # Capture the "base" environment.
 function reenv-base() {
+    _reenv_maybe_usage "$*" && return 1
+
     _reenv_dump > "$_reenv_file_base"
     _reenv_dump_unset > "$_reenv_file_unset_base"
 }
@@ -76,6 +95,8 @@ function reenv-base() {
 # Dump the part of the current environment that has changed since
 # reenv-base in a format that can be source'd later.
 function reenv-cap() {
+    _reenv_maybe_usage "$*" && return 1
+
     if ! [[ -f "$_reenv_file_base" ]] ; then
         echo "Use reenv-base to capture the base line environment first!" 1>&2
         return 1
