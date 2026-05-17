@@ -41,12 +41,18 @@ source /tmp/env-delta.sh
 source reenv.bash
 reenv-base
 
+export BUILD_FLAGS=""
+export DEBUG=1
+
+# Changes environmental variables in a subshell.
 (
     export BUILD_FLAGS="-O2 -DNDEBUG"
     unset DEBUG
     reenv-cap > /tmp/env-delta.sh
 )
+# Outside of the subshell. The above changes won't be visible here.
 
+# Replay.
 source /tmp/env-delta.sh
 # BUILD_FLAGS is now set and DEBUG is unset in the current shell
 ```
