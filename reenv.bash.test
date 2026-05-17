@@ -167,6 +167,12 @@ echo $?
     function func2() { echo not ok; }
     function func3() { echo not ok; }
 
+    # Export a new function
+    # BUG: This will be in the delta, but it will not be
+    # exported.
+    function func4() { echo not ok; }
+    export -f func4
+
     reenv-cap > /tmp/reenv-test.sh
     cat /tmp/reenv-test.sh
     echo $?
@@ -191,6 +197,22 @@ func2
 echo "Calling func3"
 func3
 
+echo "Calling func4"
+func4
+
+# func2 is exported, so it is visible from child procs
+echo "Calling func2 (exported)"
+bash -c "func2"
+
+# func3 is exported, so it is not visible.
+echo "Calling func2 (unexported)"
+bash -c "func3"
+
+
+# Func 4 was a new method in subshell and was exported,
+# so it should be visible from child procs, but it will not, for now.
+echo "Calling func4 (exported in subshell)"
+bash -c "func4"
 # ----- end of eval -----
 ' '0
 # Capture in subshell!
@@ -203,6 +225,11 @@ func2 ()
 }
 #func3()
 func3 () 
+{ 
+    echo not ok
+}
+#func4()
+func4 () 
 { 
     echo not ok
 }
@@ -225,6 +252,11 @@ func3 ()
 { 
     echo not ok
 }
+#func4()
+func4 () 
+{ 
+    echo not ok
+}
 #var3
 declare -- var3="ccc"
 0
@@ -232,8 +264,15 @@ Calling func2
 not ok
 Calling func3
 not ok
+Calling func4
+not ok
+Calling func2 (exported)
+not ok
+Calling func2 (unexported)
+bash: line 1: func3: command not found
+Calling func4 (exported in subshell)
+bash: line 1: func4: command not found
 '
-
 
 
 # ==========================================================
