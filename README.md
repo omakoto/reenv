@@ -27,6 +27,8 @@ The output of `reenv-cap` is valid bash: source it (or pipe it through bash)
 to apply the same changes — including variable deletions and function changes —
 to another shell.
 
+To exclude specific variables or functions from the output, set a regex to `REENV_SKIP`.
+
 # Examples
 
 ## Capture env changes and apply them in the same shell

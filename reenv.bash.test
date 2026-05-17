@@ -335,6 +335,44 @@ See https://github.com/omakoto/reenv for more details.
 1
 '
 
+# ==========================================================
+test "Custom skip" '
+REENV_SKIP="(2x|3)"
+reenv-base
+
+var1="abc"
+var2="def"
+var2x="xyz"
+func1() {
+    :
+}
+func2() {
+    :
+}
+func3() {
+    :
+}
+
+reenv-cap
+echo $?
+# ----- end of eval -----
+' '#func1()
+func1 () 
+{ 
+    :
+}
+#func2()
+func2 () 
+{ 
+    :
+}
+#var1
+declare -- var1="abc"
+#var2
+declare -- var2="def"
+0
+'
+
 
 # ==========================================================
 if (( $num_failure == 0 )) && (( $num_tests > 0 )) ; then

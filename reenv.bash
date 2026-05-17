@@ -31,16 +31,26 @@ function _reenv_clear() {
 }
 _reenv_clear
 
+function _reenv_init() {
+    _reenv_custom_skip="${REENV_SKIP:-}"
+}
 
 # Detect if a variable (or function) name should be skipped.
 function _reenv_skip() {
     local name="$1"
-    [[ "$name" =~ ^(reenv|_reenv|BASH|FUNCNAME$|RANDOM$|SRANDOM$|EPOCHREALTIME$|EPOCHSECONDS$|SECONDS$|USER$|PWD$|_$) ]]
+    if [[ "$name" =~ ^(reenv|_reenv|REENV|BASH|FUNCNAME$|RANDOM$|SRANDOM$|EPOCHREALTIME$|EPOCHSECONDS$|SECONDS$|USER$|PWD$|_$) ]] ; then
+        return 0
+    fi
+    if [[ "$_reenv_custom_skip" != "" && "$name" =~ ${_reenv_custom_skip} ]] ; then
+        return 0
+    fi
+    return 1
 }
 
 # Dump all variables and functions
 function _reenv_dump() {
     {
+        # Dump variables.
         compgen -v | while read -r name; do
             # Skip certain variables
             _reenv_skip "$name" && continue
@@ -49,7 +59,7 @@ function _reenv_dump() {
             echo -ne '\0'
         done
 
-        # functions
+        # Dump functions.
         compgen -A function | while read -r name; do
             _reenv_skip "$name" && continue
             echo "#$name()"
@@ -79,6 +89,7 @@ function _reenv_dump_unset() {
 
 # Capture the "base" environment.
 function reenv-base() {
+    _reenv_init
     _reenv_maybe_usage "$*" && return 1
 
     _reenv_dump > "$_reenv_file_base"
@@ -88,6 +99,7 @@ function reenv-base() {
 # Dump the part of the current environment that has changed since
 # reenv-base in a format that can be source'd later.
 function reenv-cap() {
+    _reenv_init
     _reenv_maybe_usage "$*" && return 1
 
     if ! [[ -f "$_reenv_file_base" ]] ; then
