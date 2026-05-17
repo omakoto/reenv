@@ -5,6 +5,14 @@ between two points in time and emits them as sourceable bash code.
 This lets you capture environment changes made in one shell (or subshell)
 and replay them in another.
 
+## What are saved
+
+Environmental variables (e.g. `$PATH`), shell variables (unexported ones) and shell functions. 
+
+## What are not saved
+
+Everything else -- for example, `stty` state, processes started in the background, shell options (e.g. `set -e`), changes made to the filesystem, etc etc.
+
 # Usage
 
 ```bash
