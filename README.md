@@ -30,8 +30,7 @@ export TOKEN="secret"
 function greet() { echo "hello $1"; }
 reenv-cap > /tmp/env-delta.sh
 
-# Later, or in a new terminal:
-source reenv.bash
+# Later, or in a new terminal. No need to source reenv.bash here:
 source /tmp/env-delta.sh
 # TOKEN and greet() are now set
 ```
