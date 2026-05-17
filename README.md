@@ -78,3 +78,21 @@ reenv-cap > /tmp/setup-delta.sh
 # Share /tmp/setup-delta.sh so others can replay the same setup:
 #   source /tmp/setup-delta.sh
 ```
+
+## Skip specific variables or functions with REENV_SKIP
+
+```bash
+source reenv.bash
+reenv-base
+
+export TOKEN="secret"
+export _INTERNAL_COUNTER=0   # don't want this in the output
+function _helper() { :; }    # internal helper, skip it too
+
+REENV_SKIP="^(_INTERNAL|_helper)"
+reenv-cap > /tmp/env-delta.sh
+# TOKEN is captured; _INTERNAL_COUNTER and _helper() are excluded
+```
+
+`REENV_SKIP` is treated as a bash regex (matched with `=~`), so you can
+combine patterns with `|` and use anchors if needed.

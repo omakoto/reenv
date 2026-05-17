@@ -337,9 +337,9 @@ See https://github.com/omakoto/reenv for more details.
 
 # ==========================================================
 test "Custom skip" '
-REENV_SKIP="(2x|3)"
 reenv-base
 
+REENV_SKIP="(2x|3)"
 var1="abc"
 var2="def"
 var2x="xyz"
