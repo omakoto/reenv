@@ -205,8 +205,14 @@ reenv-cap
 echo $?
 
 echo "# Apply again!"
-. /tmp/reenv-test.sh
-echo $?
+# Apply in a function, to make sure variables are declared as global.
+# The reenv_ function name prefix is to avoid printing this method
+# in a subsequent dump.
+function reenv_test_apply_func() {
+    . /tmp/reenv-test.sh
+    echo $?
+}
+reenv_test_apply_func
 
 # Now, this should print the same delta.
 reenv-cap
