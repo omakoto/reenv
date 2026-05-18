@@ -9,6 +9,8 @@ and replay them in another.
 
 Environmental variables (e.g. `$PATH`), shell variables (unexported ones) and shell functions. 
 
+TODO: Aliases
+
 ## What will not be saved
 
 Everything else -- for example, `stty` state, processes started in the background, shell options (e.g. `set -e`), changes made to the filesystem, umask, etc etc.

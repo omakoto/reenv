@@ -367,17 +367,17 @@ See https://github.com/omakoto/reenv for more details.
 test "Custom skip" '
 reenv-base
 
-REENV_SKIP="(2x|3)"
+REENV_SKIP="(2XXX|3YYY)"
 var1="abc"
 var2="def"
-var2x="xyz"
+var2XXX="xyz"
 func1() {
     :
 }
 func2() {
     :
 }
-func3() {
+func3YYY() {
     :
 }
 
