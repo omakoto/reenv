@@ -76,6 +76,14 @@ function _reenv_dump() {
             declare -p -f "$name"
             echo -ne '\0'
         done
+
+        # Dump aliases
+        compgen -a | while read -r name; do
+            _reenv_skip "$name" && continue
+            echo "#$name (alias)"
+            alias "$name"
+            echo -ne '\0'
+        done
     } | LC_ALL=C sort -z
 }
 
@@ -93,6 +101,12 @@ function _reenv_dump_unset() {
         compgen -A function | while read -r name; do
             _reenv_skip "$name" && continue
             printf "unset -f \"%s\"\n\0" "$name"
+        done
+
+        # aliases
+        compgen -a | while read -r name; do
+            _reenv_skip "$name" && continue
+            printf "unalias \"%s\"\n\0" "$name"
         done
     } | LC_ALL=C sort -z
 }

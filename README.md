@@ -7,9 +7,8 @@ and replay them in another.
 
 ## What will be saved
 
-Environmental variables (e.g. `$PATH`), shell variables (unexported ones) and shell functions. 
-
-TODO: Aliases
+Environmental variables (e.g. `$PATH`), shell variables (unexported ones), shell functions and
+aliases.
 
 ## What will not be saved
 
