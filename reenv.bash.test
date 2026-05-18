@@ -124,8 +124,8 @@ alias BBB="
 
 reenv-cap
 echo $?
-# ----- end of eval -----
 EOF
+# ---------------------------- end of eval -----------------------------
 )" "$(cat <<EOF
 0
 #BBB (alias)
@@ -192,16 +192,24 @@ declare -g -- var3="ccc"
 '
 
 # ==========================================================
-test "Actually apply" '
+test "Actually apply" "$(cat <<EOF
+shopt -s expand_aliases # Need this to execute aliases in here
 
 var1=aaa
-var2=bbb
+var2="b
+b
+b"
 function func1() { echo ok; }
-function func2() { echo ok; }
+function func2() {
+    echo ok
+}
 
-# Also try exporing the functions
+# Also try exporting the functions
 export -f func1
 export -f func2
+
+alias alias1="echo alias1"
+alias alias2="echo alias2"
 
 reenv-base
 echo $?
@@ -211,14 +219,21 @@ echo $?
     echo "# Capture in subshell!"
     unset -v var1
     var2=bbb
-    var3=ccc
+    var3="c
+c
+c"
     unset -f func1
     function func2() { echo not ok; }
     function func3() { echo not ok; }
 
+
     # Export a new function.
     function func4() { echo not ok; }
     export -f func4
+
+    # Change aliases
+    unalias alias1
+    alias alias3="echo alias3"
 
     reenv-cap > /tmp/reenv-test.sh
     echo "--- Delta in subshell START ---"
@@ -241,6 +256,7 @@ function reenv_test_apply_func() {
 }
 reenv_test_apply_func
 
+echo "# Capture after apply"
 # Now, this should print the same delta.
 reenv-cap
 echo $?
@@ -266,58 +282,77 @@ bash -c "func3"
 # Func 4 was a new function in subshell and was exported,
 echo "Calling func4 (exported in subshell)"
 bash -c "func4"
-# ----- end of eval -----
-' '0
+
+echo "Calling aliases"
+alias1
+alias2
+alias3
+
+EOF
+# ---------------------------- end of eval -----------------------------
+)" "$(cat <<EOF
+0
 # Capture in subshell!
 --- Delta in subshell START ---
+unalias "alias1"
 unset -f "func1"
 unset -v "var1"
+#alias3 (alias)
+alias alias3='echo alias3'
 #func2()
-func2 ()
-{
+func2 () 
+{ 
     echo not ok
 }
 declare -fx func2
 #func3()
-func3 ()
-{
+func3 () 
+{ 
     echo not ok
 }
 #func4()
-func4 ()
-{
+func4 () 
+{ 
     echo not ok
 }
 declare -fx func4
+#var2
+declare -g -- var2="bbb"
 #var3
-declare -g -- var3="ccc"
+declare -g -- var3=$'c\nc\nc'
 0
 --- Delta in subshell END ---
 # Capture again, which should be empty
 0
 # Apply again!
 0
+# Capture after apply
+unalias "alias1"
 unset -f "func1"
 unset -v "var1"
+#alias3 (alias)
+alias alias3='echo alias3'
 #func2()
-func2 ()
-{
+func2 () 
+{ 
     echo not ok
 }
 declare -fx func2
 #func3()
-func3 ()
-{
+func3 () 
+{ 
     echo not ok
 }
 #func4()
-func4 ()
-{
+func4 () 
+{ 
     echo not ok
 }
 declare -fx func4
+#var2
+declare -g -- var2="bbb"
 #var3
-declare -g -- var3="ccc"
+declare -g -- var3=$'c\nc\nc'
 0
 Calling func2
 not ok
@@ -331,7 +366,12 @@ Calling func2 (unexported)
 bash: line 1: func3: command not found
 Calling func4 (exported in subshell)
 not ok
-'
+Calling aliases
+./reenv.bash.test: line 121: alias1: command not found
+alias2
+alias3
+EOF
+)"
 
 # ==========================================================
 test "Help" '
