@@ -19,6 +19,16 @@ EOF
     return 0
 }
 
+# Check if we have all the necessary commands
+function _reenv_pre_check() {
+    if ! command -v comm >&/dev/null ; then
+        echo 'reenv: Requires `comm` command. Install with `atp install coreutils`.' 1>&2
+        return 1
+    fi
+    return 0
+}
+
+_reenv_pre_check
 
 _reenv_file_base="${_reenv_file_base:-$(mktemp --suffix _reenv)}"
 _reenv_file_current="${_reenv_file_current:-${_reenv_file_base}-cur}"

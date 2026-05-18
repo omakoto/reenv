@@ -5,6 +5,8 @@
 num_tests=0
 num_failure=0
 
+DIFF=/usr/bin/diff
+
 function green() {
     echo -en "\033[0;32m${*}\033[0m"
 }
@@ -28,7 +30,7 @@ function test() {
     local actual="$(eval "$run" 2>&1)"
     rc=$?
 
-    diff -Z -u <(echo -n "$expected") <(echo -n "$actual")
+    $DIFF -Z -u <(echo -n "$expected") <(echo -n "$actual")
     rc=$?
     if (( $rc == 0 )); then
         green "PASSED"
@@ -360,6 +362,23 @@ and replay them in another.
 
 See https://github.com/omakoto/reenv for more details.
 
+1
+'
+
+# ==========================================================
+test "Precheck success" '
+_reenv_pre_check
+echo $?
+# ----- end of eval -----
+' '0
+'
+
+# ==========================================================
+PATH=./ test "Precheck fail" '
+_reenv_pre_check
+echo $?
+# ----- end of eval -----
+' 'reenv: Requires `comm` command. Install with `atp install coreutils`.
 1
 '
 
