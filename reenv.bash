@@ -57,7 +57,7 @@ function _reenv_dump() {
             echo "#$name"
             declare -p "$name"
             echo -ne '\0'
-        done
+        done | sed -e 's! ! -g !' # Make variables global
 
         # Dump functions.
         compgen -A function | while read -r name; do

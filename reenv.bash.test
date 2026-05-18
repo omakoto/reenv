@@ -28,7 +28,7 @@ function test() {
     local actual="$(eval "$run" 2>&1)"
     rc=$?
 
-    diff -Z -c <(echo -n "$expected") <(echo -n "$actual")
+    diff -Z -u <(echo -n "$expected") <(echo -n "$actual")
     rc=$?
     if (( $rc == 0 )); then
         green "PASSED"
@@ -87,11 +87,11 @@ echo $?
 # ----- end of eval -----
 ' '0
 #XXX
-declare -x XXX="xyz def"
+declare -g -x XXX="xyz def"
 #aaa
-declare -- aaa="abc"
+declare -g -- aaa="abc"
 #changed
-declare -- changed="new"
+declare -g -- changed="new"
 0
 '
 
@@ -122,7 +122,7 @@ b ()
     echo ok
 }
 #var
-declare -- var="xxx"
+declare -g -- var="xxx"
 0
 '
 
@@ -160,7 +160,7 @@ func3 ()
     echo not ok
 }
 #var3
-declare -- var3="ccc"
+declare -g -- var3="ccc"
 0
 '
 
@@ -257,7 +257,7 @@ func4 ()
 }
 declare -fx func4
 #var3
-declare -- var3="ccc"
+declare -g -- var3="ccc"
 0
 --- Delta in subshell END ---
 # Capture again, which should be empty
@@ -284,7 +284,7 @@ func4 ()
 }
 declare -fx func4
 #var3
-declare -- var3="ccc"
+declare -g -- var3="ccc"
 0
 Calling func2
 not ok
@@ -389,9 +389,9 @@ func2 ()
     :
 }
 #var1
-declare -- var1="abc"
+declare -g -- var1="abc"
 #var2
-declare -- var2="def"
+declare -g -- var2="def"
 0
 '
 
