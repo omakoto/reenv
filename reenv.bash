@@ -89,30 +89,40 @@ function _reenv_dump_unset() {
 
 # Capture the "base" environment.
 function reenv-base() {
-    _reenv_init
-    _reenv_maybe_usage "$*" && return 1
+    (
+        set -e
+        _reenv_init
+        _reenv_maybe_usage "$*" && return 1
 
-    _reenv_dump > "$_reenv_file_base"
-    _reenv_dump_unset > "$_reenv_file_unset_base"
+        _reenv_dump > "$_reenv_file_base"
+        _reenv_dump_unset > "$_reenv_file_unset_base"
+
+        if ! (( $_reenv_quiet )) ; then
+            echo "reenv: Captured baseline. Use reenv-cap to print the delta." 1>&2
+        fi
+    )
 }
 
 # Dump the part of the current environment that has changed since
 # reenv-base in a format that can be source'd later.
 function reenv-cap() {
-    _reenv_init
-    _reenv_maybe_usage "$*" && return 1
+    (
+        set -e
+        _reenv_init
+        _reenv_maybe_usage "$*" && return 1
 
-    if ! [[ -f "$_reenv_file_base" ]] ; then
-        echo "Use reenv-base to capture the base line environment first!" 1>&2
-        return 1
-    fi
+        if ! [[ -f "$_reenv_file_base" ]] ; then
+            echo "reenv: Use reenv-base to capture the base line environment first!" 1>&2
+            return 1
+        fi
 
-    _reenv_dump > "$_reenv_file_current"
-    _reenv_dump_unset > "$_reenv_file_unset_current"
+        _reenv_dump > "$_reenv_file_current"
+        _reenv_dump_unset > "$_reenv_file_unset_current"
 
-    # Dump deleted variables and functions with `unset`.
-    LC_ALL=C comm -23 -z "$_reenv_file_unset_base" "$_reenv_file_unset_current" | tr -d '\0'
+        # Dump deleted variables and functions with `unset`.
+        LC_ALL=C comm -23 -z "$_reenv_file_unset_base" "$_reenv_file_unset_current" | tr -d '\0'
 
-    # Dump added or changed variables and functions
-    LC_ALL=C comm -13 -z "$_reenv_file_base" "$_reenv_file_current" | tr -d '\0'
+        # Dump added or changed variables and functions
+        LC_ALL=C comm -13 -z "$_reenv_file_base" "$_reenv_file_current" | tr -d '\0'
+    )
 }
