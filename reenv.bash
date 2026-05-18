@@ -64,7 +64,7 @@ function _reenv_dump() {
         compgen -v | while read -r name; do
             # Skip certain variables
             _reenv_skip "$name" && continue
-            echo "#$name"
+            echo "#v:$name"
             declare -p "$name"
             echo -ne '\0'
         done | sed -e 's! ! -g !' # Make variables global
@@ -72,7 +72,7 @@ function _reenv_dump() {
         # Dump functions.
         compgen -A function | while read -r name; do
             _reenv_skip "$name" && continue
-            echo "#$name()"
+            echo "#f:$name()"
             declare -p -f "$name"
             echo -ne '\0'
         done
@@ -80,7 +80,7 @@ function _reenv_dump() {
         # Dump aliases
         compgen -a | while read -r name; do
             _reenv_skip "$name" && continue
-            echo "#$name (alias)"
+            echo "#a:$name(alias)"
             alias "$name"
             echo -ne '\0'
         done

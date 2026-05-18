@@ -88,11 +88,11 @@ reenv-cap
 echo $?
 # ----- end of eval -----
 ' '0
-#XXX
+#v:XXX
 declare -g -x XXX="xyz def"
-#aaa
+#v:aaa
 declare -g -- aaa="abc"
-#changed
+#v:changed
 declare -g -- changed="new"
 0
 '
@@ -128,21 +128,21 @@ EOF
 # ---------------------------- end of eval -----------------------------
 )" "$(cat <<EOF
 0
-#BBB (alias)
+#a:BBB(alias)
 alias BBB='
     echo BBB
 '
-#a()
+#f:a()
 a () 
 { 
     echo not ok
 }
-#b()
+#f:b()
 b () 
 { 
     echo "ok😄"
 }
-#var
+#v:var
 declare -g -- var=$'X\nY\nZ'
 0
 EOF
@@ -176,17 +176,17 @@ echo $?
 unalias "alias2"
 unset -f "func1"
 unset -v "var1"
-#func2()
+#f:func2()
 func2 () 
 { 
     echo not ok
 }
-#func3()
+#f:func3()
 func3 () 
 { 
     echo not ok
 }
-#var3
+#v:var3
 declare -g -- var3="ccc"
 0
 '
@@ -297,28 +297,28 @@ EOF
 unalias "alias1"
 unset -f "func1"
 unset -v "var1"
-#alias3 (alias)
+#a:alias3(alias)
 alias alias3='echo alias3'
-#func2()
+#f:func2()
 func2 () 
 { 
     echo not ok
 }
 declare -fx func2
-#func3()
+#f:func3()
 func3 () 
 { 
     echo not ok
 }
-#func4()
+#f:func4()
 func4 () 
 { 
     echo not ok
 }
 declare -fx func4
-#var2
+#v:var2
 declare -g -- var2="bbb"
-#var3
+#v:var3
 declare -g -- var3=$'c\nc\nc'
 0
 --- Delta in subshell END ---
@@ -330,28 +330,28 @@ declare -g -- var3=$'c\nc\nc'
 unalias "alias1"
 unset -f "func1"
 unset -v "var1"
-#alias3 (alias)
+#a:alias3(alias)
 alias alias3='echo alias3'
-#func2()
+#f:func2()
 func2 () 
 { 
     echo not ok
 }
 declare -fx func2
-#func3()
+#f:func3()
 func3 () 
 { 
     echo not ok
 }
-#func4()
+#f:func4()
 func4 () 
 { 
     echo not ok
 }
 declare -fx func4
-#var2
+#v:var2
 declare -g -- var2="bbb"
-#var3
+#v:var3
 declare -g -- var3=$'c\nc\nc'
 0
 Calling func2
@@ -468,19 +468,19 @@ func3YYY() {
 reenv-cap
 echo $?
 # ----- end of eval -----
-' '#func1()
+' '#f:func1()
 func1 () 
 { 
     :
 }
-#func2()
+#f:func2()
 func2 () 
 { 
     :
 }
-#var1
+#v:var1
 declare -g -- var1="abc"
-#var2
+#v:var2
 declare -g -- var2="def"
 0
 '
