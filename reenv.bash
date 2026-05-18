@@ -119,10 +119,12 @@ function reenv-cap() {
         _reenv_dump > "$_reenv_file_current"
         _reenv_dump_unset > "$_reenv_file_unset_current"
 
-        # Dump deleted variables and functions with `unset`.
-        LC_ALL=C comm -23 -z "$_reenv_file_unset_base" "$_reenv_file_unset_current" | tr -d '\0'
+        {
+            # Dump deleted variables and functions with `unset`.
+            LC_ALL=C comm -23 -z "$_reenv_file_unset_base" "$_reenv_file_unset_current"
 
-        # Dump added or changed variables and functions
-        LC_ALL=C comm -13 -z "$_reenv_file_base" "$_reenv_file_current" | tr -d '\0'
+            # Dump added or changed variables and functions
+            LC_ALL=C comm -13 -z "$_reenv_file_base" "$_reenv_file_current"
+        } | tr -d '\0'
     )
 }
