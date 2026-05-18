@@ -48,7 +48,7 @@ function _reenv_init() {
 # Detect if a variable (or function) name should be skipped.
 function _reenv_skip() {
     local name="$1"
-    if [[ "$name" =~ ^(reenv|_reenv|REENV|BASH|FUNCNAME$|RANDOM$|SRANDOM$|EPOCHREALTIME$|EPOCHSECONDS$|SECONDS$|USER$|PWD$|_$) ]] ; then
+    if [[ "$name" =~ ^(reenv|_reenv|REENV|BASH|FUNCNAME$|RANDOM$|SRANDOM$|EPOCHREALTIME$|EPOCHSECONDS$|SECONDS$|USER$|PWD$|_$|COLUMNS$|LINES$) ]] ; then
         return 0
     fi
     if [[ "$_reenv_custom_skip" != "" && "$name" =~ ${_reenv_custom_skip} ]] ; then
