@@ -30,14 +30,14 @@ function _reenv_pre_check() {
 
 _reenv_pre_check
 
-_reenv_file_base="${_reenv_file_base:-$(mktemp --suffix _reenv)}"
-_reenv_file_current="${_reenv_file_current:-${_reenv_file_base}-cur}"
-_reenv_file_unset_base="${_reenv_file_unset_base:-$(mktemp --suffix _reenv)}"
-_reenv_file_unset_current="${_reenv_file_unset_current:-${_reenv_file_unset_base}-cur}"
+_reenv_file_base="${_reenv_file_base:-$(mktemp --suffix _reenv_base)}"
+_reenv_file_current="${_reenv_file_current:-$(mktemp --suffix _reenv_cur)}"
+_reenv_file_unset_base="${_reenv_file_unset_base:-$(mktemp --suffix _reenv_unset_base)}"
+_reenv_file_unset_current="${_reenv_file_unset_current:-$(mktemp --suffix _reenv_unset_cur)}"
 
 function _reenv_clear() {
-    rm -f "$_reenv_file_base"*
-    rm -f "$_reenv_file_unset_base"*
+    echo -n > "$_reenv_file_base"*
+    echo -n > "$_reenv_file_unset_base"*
 }
 _reenv_clear
 
@@ -135,7 +135,7 @@ function reenv-cap() {
         _reenv_init
         _reenv_maybe_usage "$*" && return 1
 
-        if ! [[ -f "$_reenv_file_base" ]] ; then
+        if ! [[ -s "$_reenv_file_base" ]] ; then
             echo "reenv: Use reenv-base to capture the base line environment first!" 1>&2
             return 1
         fi
