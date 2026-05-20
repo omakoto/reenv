@@ -74,15 +74,9 @@ function _reenv_dump() {
             # Skip certain variables
             _reenv_skip "$name" && continue
             echo "#v:$name"
-
-            # We need to inject `-g` to the output
-            # delcare command so that the variables
-            # will be global, even if it's executed
-            # in a function.
-            local decl="$(declare -p "$name")"
-            echo "${decl/#declare /declare -g }"
+            declare -p "$name"
             printf '\0'
-        done
+        done | sed -e 's/^declare /declare -g /'
 
         # Dump functions.
         compgen -A function | while IFS= read -r name; do
