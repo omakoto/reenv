@@ -113,6 +113,33 @@ function _reenv_dump_unset() {
     } | LC_ALL=C sort -z
 }
 
+function _reenv_comm() {
+    if [[ "$REENV_USE_COMM_FALLBACK" == "1" ]]; then
+        _reenv_comm_z "$@"
+    else
+        LC_ALL=C comm -z "$@"
+    fi
+}
+
+# Simulate `comm -z` using python3, in case comm isn't installed.
+function _reenv_comm_z() {
+    local mode="$1"
+    local file1="$2"
+    local file2="$3"
+
+    python3 -c '
+import sys
+mode, f1, f2 = sys.argv[1:]
+with open(f1, "rb") as h1, open(f2, "rb") as h2:
+    s1 = set(h1.read().split(b"\0"))
+    s2 = set(h2.read().split(b"\0"))
+    res = s1 - s2 if mode == "-23" else s2 - s1
+    for line in sorted(res):
+        if line:
+            sys.stdout.buffer.write(line + b"\0")
+' "$mode" "$file1" "$file2"
+}
+
 # Capture the "base" environment.
 function reenv-base() {
     (
@@ -147,10 +174,10 @@ function reenv-cap() {
 
         {
             # Dump deleted variables and functions with `unset`.
-            LC_ALL=C comm -23 -z "$_reenv_file_unset_base" "$_reenv_file_unset_current"
+            _reenv_comm -23 "$_reenv_file_unset_base" "$_reenv_file_unset_current"
 
             # Dump added or changed variables and functions
-            LC_ALL=C comm -13 -z "$_reenv_file_base" "$_reenv_file_current"
+            _reenv_comm -13 "$_reenv_file_base" "$_reenv_file_current"
         } | tr -d '\0'
     )
 }

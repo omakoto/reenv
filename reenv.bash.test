@@ -506,6 +506,28 @@ EOF
 )"
 
 
+test "Comm fallback" "$(cat <<'EOF'
+export var_to_del="bye"
+reenv-base
+echo $?
+
+unset var_to_del
+export var_to_add="hello"
+export REENV_USE_COMM_FALLBACK=1
+
+reenv-cap
+echo $?
+EOF
+)" "$(cat <<'EOF'
+0
+unset -v var_to_del
+#v:var_to_add
+declare -g -x var_to_add="hello"
+0
+EOF
+)"
+
+
 # ==========================================================
 if (( $num_failure == 0 )) && (( $num_tests > 0 )) ; then
     green "ALL TESTS PASSED!"
