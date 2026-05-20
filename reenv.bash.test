@@ -528,6 +528,55 @@ EOF
 )"
 
 
+test "Readonly override robustness" "$(cat <<'EOF'
+# 1. Baseline
+reenv-base > /dev/null
+
+# 2. Capture in subshell (variable is new there)
+(
+    readonly my_readonly="captured"
+    zz_after="captured"
+    reenv-cap > /tmp/reenv-robust.sh
+)
+
+# 3. Parent shell setup (pre-existing readonly with different value)
+readonly my_readonly="original"
+
+# 4. Apply the captured script
+# We want to see the error message this time.
+source /tmp/reenv-robust.sh
+
+# 5. Verify results
+echo "my_readonly: $my_readonly"
+echo "zz_after: $zz_after"
+EOF
+)" "$(cat <<'EOF'
+/tmp/reenv-robust.sh: line 2: declare: my_readonly: readonly variable
+my_readonly: original
+zz_after: captured
+EOF
+)"
+
+
+test "Change REENV_SKIP after base" "$(cat <<'EOF'
+# 1. Baseline
+reenv-base > /dev/null
+
+# 2. Set a variable and then decide to skip it
+export skip_me="secret"
+export keep_me="hello"
+export REENV_SKIP="skip_me"
+
+# 3. Capture
+reenv-cap
+EOF
+)" "$(cat <<'EOF'
+#v:keep_me
+declare -g -x keep_me="hello"
+EOF
+)"
+
+
 # ==========================================================
 if (( $num_failure == 0 )) && (( $num_tests > 0 )) ; then
     green "ALL TESTS PASSED!"

@@ -44,6 +44,7 @@ function _reenv_clear() {
 _reenv_clear
 
 function _reenv_init() {
+    # It is intentional that REENV_SKIP can be changed between reenv-base and reenv-cap.
     _reenv_custom_skip="${REENV_SKIP:-}"
 }
 
