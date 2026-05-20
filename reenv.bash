@@ -22,7 +22,7 @@ EOF
 # Check if we have all the necessary commands
 function _reenv_pre_check() {
     if ! command -v comm >&/dev/null ; then
-        echo 'reenv: Requires `comm` command. Install with `atp install coreutils`.' 1>&2
+        echo 'reenv: Requires `comm` command. Install with `apt install coreutils`.' 1>&2
         return 1
     fi
     return 0
@@ -96,19 +96,19 @@ function _reenv_dump_unset() {
             _reenv_skip "$name" && continue
             # Use double quotes just so it's easier to write the expected
             # text in tests.
-            printf "unset -v \"%s\"\n\0" "$name"
+            printf "unset -v %q\n\0" "$name"
         done
 
         # functions
         compgen -A function | while read -r name; do
             _reenv_skip "$name" && continue
-            printf "unset -f \"%s\"\n\0" "$name"
+            printf "unset -f %q\n\0" "$name"
         done
 
         # aliases
         compgen -a | while read -r name; do
             _reenv_skip "$name" && continue
-            printf "unalias \"%s\"\n\0" "$name"
+            printf "unalias %q\n\0" "$name"
         done
     } | LC_ALL=C sort -z
 }

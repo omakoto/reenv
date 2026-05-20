@@ -173,9 +173,9 @@ reenv-cap
 echo $?
 # ----- end of eval -----
 ' '0
-unalias "alias2"
-unset -f "func1"
-unset -v "var1"
+unalias alias2
+unset -f func1
+unset -v var1
 #f:func2()
 func2 () 
 { 
@@ -294,9 +294,9 @@ EOF
 0
 # Capture in subshell!
 --- Delta in subshell START ---
-unalias "alias1"
-unset -f "func1"
-unset -v "var1"
+unalias alias1
+unset -f func1
+unset -v var1
 #a:alias3(alias)
 alias alias3='echo alias3'
 #f:func2()
@@ -327,9 +327,9 @@ declare -g -- var3=$'c\nc\nc'
 # Apply again!
 0
 # Capture after apply
-unalias "alias1"
-unset -f "func1"
-unset -v "var1"
+unalias alias1
+unset -f func1
+unset -v var1
 #a:alias3(alias)
 alias alias3='echo alias3'
 #f:func2()
@@ -443,9 +443,8 @@ PATH=./ test "Precheck fail" '
 _reenv_pre_check
 echo $?
 # ----- end of eval -----
-' 'reenv: Requires `comm` command. Install with `atp install coreutils`.
-1
-'
+' 'reenv: Requires `comm` command. Install with `apt install coreutils`.
+1'
 
 # ==========================================================
 test "Custom skip" '
@@ -484,6 +483,27 @@ declare -g -- var1="abc"
 declare -g -- var2="def"
 0
 '
+
+
+# ==========================================================
+test "Quoting in deletion" "$(cat <<'EOF'
+# '[' is a valid function name in Bash but requires escaping.
+function [ () { :; }
+
+reenv-base
+echo $?
+
+unset -f [
+
+reenv-cap
+echo $?
+EOF
+)" "$(cat <<'EOF'
+0
+unset -f \[
+0
+EOF
+)"
 
 
 # ==========================================================
