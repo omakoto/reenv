@@ -19,8 +19,14 @@ EOF
     return 0
 }
 
-# Check if we have all the necessary commands
+# Check if we have all the necessary commands and correct Bash version
 function _reenv_pre_check() {
+    # Check Bash version (requires 4.2+ for declare -g)
+    if [[ -z "${BASH_VERSINFO[0]}" ]] || (( BASH_VERSINFO[0] < 4 )) || { (( BASH_VERSINFO[0] == 4 )) && (( BASH_VERSINFO[1] < 2 )); }; then
+        echo "reenv: Requires Bash 4.2 or later." 1>&2
+        return 1
+    fi
+
     if ! command -v comm >&/dev/null ; then
         echo 'reenv: Requires `comm` command. Install with `apt install coreutils`.' 1>&2
         return 1
@@ -28,12 +34,12 @@ function _reenv_pre_check() {
     return 0
 }
 
-_reenv_pre_check
+_reenv_pre_check || return 1 2>/dev/null || exit 1
 
-_reenv_file_base="${_reenv_file_base:-$(mktemp --suffix _reenv_base)}"
-_reenv_file_current="${_reenv_file_current:-$(mktemp --suffix _reenv_cur)}"
-_reenv_file_unset_base="${_reenv_file_unset_base:-$(mktemp --suffix _reenv_unset_base)}"
-_reenv_file_unset_current="${_reenv_file_unset_current:-$(mktemp --suffix _reenv_unset_cur)}"
+_reenv_file_base="${_reenv_file_base:-$(mktemp "${TMPDIR:-/tmp}/reenv_base.XXXXXX")}"
+_reenv_file_current="${_reenv_file_current:-$(mktemp "${TMPDIR:-/tmp}/reenv_cur.XXXXXX")}"
+_reenv_file_unset_base="${_reenv_file_unset_base:-$(mktemp "${TMPDIR:-/tmp}/reenv_unset_base.XXXXXX")}"
+_reenv_file_unset_current="${_reenv_file_unset_current:-$(mktemp "${TMPDIR:-/tmp}/reenv_unset_cur.XXXXXX")}"
 
 function _reenv_clear() {
     echo -n > "$_reenv_file_base"
