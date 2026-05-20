@@ -36,8 +36,10 @@ _reenv_file_unset_base="${_reenv_file_unset_base:-$(mktemp --suffix _reenv_unset
 _reenv_file_unset_current="${_reenv_file_unset_current:-$(mktemp --suffix _reenv_unset_cur)}"
 
 function _reenv_clear() {
-    echo -n > "$_reenv_file_base"*
-    echo -n > "$_reenv_file_unset_base"*
+    echo -n > "$_reenv_file_base"
+    echo -n > "$_reenv_file_current"
+    echo -n > "$_reenv_file_unset_base"
+    echo -n > "$_reenv_file_unset_current"
 }
 _reenv_clear
 
