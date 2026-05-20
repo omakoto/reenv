@@ -37,15 +37,15 @@ function _reenv_pre_check() {
 _reenv_pre_check || return 1 2>/dev/null || exit 1
 
 _reenv_file_base="${_reenv_file_base:-$(mktemp "${TMPDIR:-/tmp}/reenv_base.XXXXXX")}"
-_reenv_file_current="${_reenv_file_current:-$(mktemp "${TMPDIR:-/tmp}/reenv_cur.XXXXXX")}"
+_reenv_file_cur="${_reenv_file_cur:-$(mktemp "${TMPDIR:-/tmp}/reenv_cur.XXXXXX")}"
 _reenv_file_unset_base="${_reenv_file_unset_base:-$(mktemp "${TMPDIR:-/tmp}/reenv_unset_base.XXXXXX")}"
-_reenv_file_unset_current="${_reenv_file_unset_current:-$(mktemp "${TMPDIR:-/tmp}/reenv_unset_cur.XXXXXX")}"
+_reenv_file_unset_cur="${_reenv_file_unset_cur:-$(mktemp "${TMPDIR:-/tmp}/reenv_unset_cur.XXXXXX")}"
 
 function _reenv_clear() {
     echo -n > "$_reenv_file_base"
-    echo -n > "$_reenv_file_current"
+    echo -n > "$_reenv_file_cur"
     echo -n > "$_reenv_file_unset_base"
-    echo -n > "$_reenv_file_unset_current"
+    echo -n > "$_reenv_file_unset_cur"
 }
 _reenv_clear
 
@@ -182,15 +182,15 @@ function reenv-cap() {
             return 1
         fi
 
-        _reenv_dump > "$_reenv_file_current"
-        _reenv_dump_unset > "$_reenv_file_unset_current"
+        _reenv_dump > "$_reenv_file_cur"
+        _reenv_dump_unset > "$_reenv_file_unset_cur"
 
         {
             # Dump deleted variables and functions with `unset`.
-            _reenv_comm -23 "$_reenv_file_unset_base" "$_reenv_file_unset_current"
+            _reenv_comm -23 "$_reenv_file_unset_base" "$_reenv_file_unset_cur"
 
             # Dump added or changed variables and functions
-            _reenv_comm -13 "$_reenv_file_base" "$_reenv_file_current"
+            _reenv_comm -13 "$_reenv_file_base" "$_reenv_file_cur"
         } | tr -d '\0'
     )
 }
