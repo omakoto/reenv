@@ -63,28 +63,28 @@ function _reenv_skip() {
 function _reenv_dump() {
     {
         # Dump variables.
-        compgen -v | while read -r name; do
+        compgen -v | while IFS= read -r name; do
             # Skip certain variables
             _reenv_skip "$name" && continue
             echo "#v:$name"
             declare -p "$name"
-            echo -ne '\0'
+            printf '\0'
         done | sed -e 's! ! -g !' # Make variables global
 
         # Dump functions.
-        compgen -A function | while read -r name; do
+        compgen -A function | while IFS= read -r name; do
             _reenv_skip "$name" && continue
             echo "#f:$name()"
             declare -p -f "$name"
-            echo -ne '\0'
+            printf '\0'
         done
 
         # Dump aliases
-        compgen -a | while read -r name; do
+        compgen -a | while IFS= read -r name; do
             _reenv_skip "$name" && continue
             echo "#a:$name(alias)"
             alias "$name"
-            echo -ne '\0'
+            printf '\0'
         done
     } | LC_ALL=C sort -z
 }
@@ -92,7 +92,7 @@ function _reenv_dump() {
 # Dump all variables with `unset`. We use it to detect deleted entries.
 function _reenv_dump_unset() {
     {
-        compgen -v | while read -r name; do
+        compgen -v | while IFS= read -r name; do
             _reenv_skip "$name" && continue
             # Use double quotes just so it's easier to write the expected
             # text in tests.
@@ -100,13 +100,13 @@ function _reenv_dump_unset() {
         done
 
         # functions
-        compgen -A function | while read -r name; do
+        compgen -A function | while IFS= read -r name; do
             _reenv_skip "$name" && continue
             printf "unset -f %q\n\0" "$name"
         done
 
         # aliases
-        compgen -a | while read -r name; do
+        compgen -a | while IFS= read -r name; do
             _reenv_skip "$name" && continue
             printf "unalias %q\n\0" "$name"
         done
