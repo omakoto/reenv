@@ -53,7 +53,7 @@ source /path/to/reenv.bash
 
 ## What is NOT Captured
 
-`reenv` only tracks shell variables, functions, and aliases. It does **not** capture other aspects of the shell or system state, including:
+`reenv` only tracks shell and environment variables, functions, and aliases. It does **not** capture other aspects of the shell or system state, including:
 
 - **System/Process State:**
   - File system changes (creation, modification, or deletion of files/directories).
