@@ -5,31 +5,29 @@
 This enables you to capture environment modifications (e.g., made within a subshell, a build script, or an installer) and replay them in your current shell or another shell session.
 
 ## Table of Contents
-- [Features](#features)
-- [How it Works](#how-it-works)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Usage Guide](#usage-guide)
-  - [1. Basic Environment Tracking](#1-basic-environment-tracking)
-  - [2. Capturing Subshell Changes](#2-capturing-subshell-changes)
-  - [3. Exporting and Applying Aliases and Functions](#3-exporting-and-applying-aliases-and-functions)
-- [Configuration](#configuration)
-  - [Excluding Variables (REENV_SKIP)](#excluding-variables-reenv_skip)
-  - [macOS / BSD Support (REENV_USE_COMM_FALLBACK)](#macos--bsd-support-reenv_use_comm_fallback)
-  - [Suppressing Output (_reenv_quiet)](#suppressing-output-_reenv_quiet)
-- [Running Tests](#running-tests)
-- [License](#license)
+- [reenv](#reenv)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [How it Works](#how-it-works)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+  - [What is NOT Captured](#what-is-not-captured)
+  - [Usage Guide](#usage-guide)
+    - [1. Basic Environment Tracking](#1-basic-environment-tracking)
+    - [2. Capturing Subshell Changes](#2-capturing-subshell-changes)
+    - [3. Exporting and Applying Aliases and Functions](#3-exporting-and-applying-aliases-and-functions)
+  - [Configuration](#configuration)
+    - [Excluding Variables (`REENV_SKIP`)](#excluding-variables-reenv_skip)
+  - [Running Tests](#running-tests)
+  - [License](#license)
 
 ---
 
 ## Features
 
 - **Tracks Variables, Functions, and Aliases:** Detects new, modified, and deleted items.
-- **Robust Serialization:** Uses `declare -p` and NUL-terminated inputs internally to handle multi-line variable values, whitespace, and special characters safely.
-- **Sourcing Safety:** Replaces local `declare` statements with `declare -g` in the output, ensuring variables are declared globally even if sourced inside a function.
 - **Preserves Export Status:** Correctly tracks and reapplies export status (`export` / `declare -x`) for variables and functions.
 - **Customizable Filter:** Easily ignore specific variables or functions using a regular expression.
-- **macOS / BSD Friendly:** Includes a Python 3 fallback for platforms where the GNU `comm -z` command is not available.
 
 ## How it Works
 
@@ -41,8 +39,7 @@ This enables you to capture environment modifications (e.g., made within a subsh
 ## Requirements
 
 - **Bash 4.2** or later (required for `declare -g` global declarations).
-- **GNU `comm`** (from `coreutils`, supporting the `-z` flag).
-- **Python 3** (optional; required only if using the macOS/BSD compatibility fallback).
+- **GNU `comm`** (from `coreutils`. Reenv requires the `-z` flag).
 
 ## Installation
 
@@ -53,6 +50,23 @@ source /path/to/reenv.bash
 ```
 
 ---
+
+## What is NOT Captured
+
+`reenv` only tracks shell variables, functions, and aliases. It does **not** capture other aspects of the shell or system state, including:
+
+- **System/Process State:**
+  - File system changes (creation, modification, or deletion of files/directories).
+  - Background or foreground processes started during the session.
+  - Active file descriptors, network connections, or pipe/stream redirections.
+- **Shell Attributes & Settings:**
+  - The current working directory (e.g., calling `cd` changes directory, but the directory path changes are not captured as `cd` commands; `PWD` itself is ignored by default).
+  - Active shell options (e.g., flags set via `shopt` or `set -o`).
+  - The file creation mask (`umask`).
+  - Signal trap handlers (`trap`).
+  - Terminal settings (`stty`).
+- **Ignored Variables:**
+  - Read-only shell variables and internal Bash/environment variables (e.g., `BASH_*`, `FUNCNAME`, `RANDOM`, `USER`, `SECONDS`, etc., which are filtered out to prevent corruption during replay).
 
 ## Usage Guide
 
@@ -145,24 +159,6 @@ export REENV_SKIP="(^TEMP_|_SECRET_)"
 
 # Take baseline
 reenv-base
-```
-
-### macOS / BSD Support (`REENV_USE_COMM_FALLBACK`)
-By default, `reenv` uses `comm -z` to compute environment differences. The `-z` flag (NUL-delimited lines) is a GNU extension. On macOS/OS X or BSD, the default `comm` command does not support `-z`.
-
-If you receive errors about `comm`, set `REENV_USE_COMM_FALLBACK=1`. `reenv` will fall back to using a lightweight python3 wrapper to perform the set operations:
-
-```bash
-export REENV_USE_COMM_FALLBACK=1
-```
-
-### Suppressing Output (`_reenv_quiet`)
-By default, `reenv-base` prints a message to standard error when it successfully captures a baseline:
-`reenv: Captured baseline. Use reenv-cap to print the delta.`
-
-To silence this message, set:
-```bash
-export _reenv_quiet=1
 ```
 
 ---
