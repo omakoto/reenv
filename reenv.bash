@@ -10,8 +10,8 @@ Reenv
 
 Reenv tracks changes to the shell environment (variables and functions)
 between two points in time and emits them as sourceable bash code.
-This lets you capture environment changes made in one shell (or subshell)
-and replay them in another.
+This lets you capture environment changes made in one shell and replay
+them in another.
 
 See https://github.com/omakoto/reenv for more details.
 
@@ -36,6 +36,8 @@ function _reenv_pre_check() {
 
 _reenv_pre_check || return 1 2>/dev/null || exit 1
 
+# Create temp files. We keep using the same files in the same shell
+# and all direct and indirect child processes.
 _reenv_file_base="${_reenv_file_base:-$(mktemp "${TMPDIR:-/tmp}/reenv_base.XXXXXX")}"
 _reenv_file_cur="${_reenv_file_cur:-$(mktemp "${TMPDIR:-/tmp}/reenv_cur.XXXXXX")}"
 _reenv_file_unset_base="${_reenv_file_unset_base:-$(mktemp "${TMPDIR:-/tmp}/reenv_unset_base.XXXXXX")}"
@@ -50,14 +52,13 @@ function _reenv_clear() {
 _reenv_clear
 
 function _reenv_init() {
-    # It is intentional that REENV_SKIP can be changed between reenv-base and reenv-cap.
     _reenv_custom_skip="${REENV_SKIP:-}"
 }
 
 # Detect if a variable (or function) name should be skipped.
 function _reenv_skip() {
     local name="$1"
-    if [[ "$name" =~ ^(reenv|_reenv|REENV|BASH|FUNCNAME$|RANDOM$|SRANDOM$|EPOCHREALTIME$|EPOCHSECONDS$|SECONDS$|USER$|PWD$|_$|COLUMNS$|LINES$) ]] ; then
+    if [[ "$name" =~ ^((reenv|_reenv|REENV|BASH).*|FUNCNAME|RANDOM|SRANDOM|EPOCHREALTIME|EPOCHSECONDS|SECONDS|USER|PWD|_|COLUMNS|LINES)$ ]] ; then
         return 0
     fi
     if [[ "$_reenv_custom_skip" != "" && "$name" =~ ${_reenv_custom_skip} ]] ; then
@@ -86,7 +87,7 @@ function _reenv_dump() {
             printf '\0'
         done
 
-        # Dump aliases
+        # Dump aliases.
         compgen -a | while IFS= read -r name; do
             _reenv_skip "$name" && continue
             echo "#a:$name(alias)"
@@ -183,7 +184,7 @@ function reenv-cap() {
             # Dump deleted variables and functions with `unset`.
             _reenv_comm -23 "$_reenv_file_unset_base" "$_reenv_file_unset_cur"
 
-            # Dump added or changed variables and functions
+            # Dump added or changed variables and functions.
             _reenv_comm -13 "$_reenv_file_base" "$_reenv_file_cur"
         } | tr -d '\0'
     )

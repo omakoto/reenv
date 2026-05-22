@@ -389,8 +389,8 @@ Reenv
 
 Reenv tracks changes to the shell environment (variables and functions)
 between two points in time and emits them as sourceable bash code.
-This lets you capture environment changes made in one shell (or subshell)
-and replay them in another.
+This lets you capture environment changes made in one shell and replay
+them in another.
 
 See https://github.com/omakoto/reenv for more details.
 
@@ -400,8 +400,8 @@ Reenv
 
 Reenv tracks changes to the shell environment (variables and functions)
 between two points in time and emits them as sourceable bash code.
-This lets you capture environment changes made in one shell (or subshell)
-and replay them in another.
+This lets you capture environment changes made in one shell and replay
+them in another.
 
 See https://github.com/omakoto/reenv for more details.
 
@@ -411,8 +411,8 @@ Reenv
 
 Reenv tracks changes to the shell environment (variables and functions)
 between two points in time and emits them as sourceable bash code.
-This lets you capture environment changes made in one shell (or subshell)
-and replay them in another.
+This lets you capture environment changes made in one shell and replay
+them in another.
 
 See https://github.com/omakoto/reenv for more details.
 
@@ -422,8 +422,8 @@ Reenv
 
 Reenv tracks changes to the shell environment (variables and functions)
 between two points in time and emits them as sourceable bash code.
-This lets you capture environment changes made in one shell (or subshell)
-and replay them in another.
+This lets you capture environment changes made in one shell and replay
+them in another.
 
 See https://github.com/omakoto/reenv for more details.
 
