@@ -55,41 +55,35 @@ function _reenv_init() {
     _reenv_custom_skip="${REENV_SKIP:-}"
 }
 
-# Detect if a variable (or function) name should be skipped.
-function _reenv_skip() {
-    local name="$1"
-    if [[ "$name" =~ ^((reenv|_reenv|REENV|BASH).*|FUNCNAME|RANDOM|SRANDOM|EPOCHREALTIME|EPOCHSECONDS|SECONDS|USER|PWD|_|COLUMNS|LINES)$ ]] ; then
-        return 0
+# Filter names using grep -E.
+function _reenv_filter() {
+    local default_skip='^((reenv|_reenv|REENV|BASH).*|FUNCNAME|RANDOM|SRANDOM|EPOCHREALTIME|EPOCHSECONDS|SECONDS|USER|PWD|_|COLUMNS|LINES)$'
+    if [[ -n "$_reenv_custom_skip" ]]; then
+        grep -E -v "$default_skip" | grep -E -v "$_reenv_custom_skip"
+    else
+        grep -E -v "$default_skip"
     fi
-    if [[ "$_reenv_custom_skip" != "" && "$name" =~ ${_reenv_custom_skip} ]] ; then
-        return 0
-    fi
-    return 1
 }
 
 # Dump all variables and functions
 function _reenv_dump() {
     {
         # Dump variables.
-        compgen -v | while IFS= read -r name; do
-            # Skip certain variables
-            _reenv_skip "$name" && continue
+        compgen -v | _reenv_filter | while IFS= read -r name; do
             echo "#v:$name"
             declare -p "$name"
             printf '\0'
         done | sed -e 's/^declare /declare -g /'
 
         # Dump functions.
-        compgen -A function | while IFS= read -r name; do
-            _reenv_skip "$name" && continue
+        compgen -A function | _reenv_filter | while IFS= read -r name; do
             echo "#f:$name()"
             declare -p -f "$name"
             printf '\0'
         done
 
         # Dump aliases.
-        compgen -a | while IFS= read -r name; do
-            _reenv_skip "$name" && continue
+        compgen -a | _reenv_filter | while IFS= read -r name; do
             echo "#a:$name(alias)"
             alias "$name"
             printf '\0'
@@ -100,22 +94,19 @@ function _reenv_dump() {
 # Dump all variables with `unset`. We use it to detect deleted entries.
 function _reenv_dump_unset() {
     {
-        compgen -v | while IFS= read -r name; do
-            _reenv_skip "$name" && continue
+        compgen -v | _reenv_filter | while IFS= read -r name; do
             # Use double quotes just so it's easier to write the expected
             # text in tests.
             printf "unset -v %q\n\0" "$name"
         done
 
         # functions
-        compgen -A function | while IFS= read -r name; do
-            _reenv_skip "$name" && continue
+        compgen -A function | _reenv_filter | while IFS= read -r name; do
             printf "unset -f %q\n\0" "$name"
         done
 
         # aliases
-        compgen -a | while IFS= read -r name; do
-            _reenv_skip "$name" && continue
+        compgen -a | _reenv_filter | while IFS= read -r name; do
             printf "unalias %q\n\0" "$name"
         done
     } | LC_ALL=C sort -z
