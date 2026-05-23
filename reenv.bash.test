@@ -19,8 +19,13 @@ function test() {
     (( ++num_tests))
 
     local label="$1"
-    local run="$2"
-    local expected="$3"
+
+    local content
+    IFS='' read -r -d '' content
+
+    local run="${content%%$'\n'=== expected ===*}"
+    local expected="${content#*=== expected ===}"
+    expected="${expected#?}"
 
     echo "================"
     green "Test:"
@@ -48,46 +53,37 @@ function test() {
 export _reenv_quiet=1
 
 # ==========================================================
-test "Call without base" "$(cat <<'EOF'
+test "Call without base" <<'EOF'
 reenv-cap
 echo $?
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<'EOF'
+=== expected ===
 reenv: Use reenv-base to capture the base line environment first!
 1
 EOF
-)"
 
 
 # ==========================================================
-_reenv_quiet=0 test "No quiet base" "$(cat <<'EOF'
+_reenv_quiet=0 test "No quiet base" <<'EOF'
 reenv-base
 echo $?
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<'EOF'
+=== expected ===
 reenv: Captured baseline. Use reenv-cap to print the delta.
 0
 EOF
-)"
 
 # ==========================================================
-test "No env change" "$(cat <<'EOF'
+test "No env change" <<'EOF'
 reenv-base
 echo $?
 reenv-cap
 echo $?
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<'EOF'
+=== expected ===
 0
 0
 EOF
-)"
 
 # ==========================================================
-test "Basic env change" "$(cat <<'EOF'
+test "Basic env change" <<'EOF'
 changed=orig
 reenv-base
 echo $?
@@ -98,9 +94,7 @@ changed=new
 
 reenv-cap
 echo $?
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<'EOF'
+=== expected ===
 0
 #v:XXX
 declare -g -x XXX="xyz def"
@@ -110,10 +104,9 @@ declare -g -- aaa="abc"
 declare -g -- changed="new"
 0
 EOF
-)"
 
 # ==========================================================
-test "Complex change" "$(cat <<EOF
+test "Complex change" <<'EOF'
 
 function a() {
     echo ok
@@ -139,9 +132,7 @@ alias BBB="
 
 reenv-cap
 echo $?
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<EOF
+=== expected ===
 0
 #a:BBB(alias)
 alias BBB='
@@ -161,10 +152,9 @@ b ()
 declare -g -- var=$'X\nY\nZ'
 0
 EOF
-)"
 
 # ==========================================================
-test "Deletion" "$(cat <<'EOF'
+test "Deletion" <<'EOF'
 var1=aaa
 var2=bbb
 function func1() { echo ok; }
@@ -185,9 +175,7 @@ function func3() { echo not ok; }
 
 reenv-cap
 echo $?
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<'EOF'
+=== expected ===
 0
 unalias alias2
 unset -f func1
@@ -206,10 +194,9 @@ func3 ()
 declare -g -- var3="ccc"
 0
 EOF
-)"
 
 # ==========================================================
-test "Actually apply" "$(cat <<EOF
+test "Actually apply" <<'EOF'
 shopt -s expand_aliases # Need this to execute aliases in here
 
 var1=aaa
@@ -304,10 +291,7 @@ echo "Calling aliases"
 alias1
 alias2
 alias3
-
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<EOF
+=== expected ===
 0
 # Capture in subshell!
 --- Delta in subshell START ---
@@ -384,14 +368,13 @@ bash: line 1: func3: command not found
 Calling func4 (exported in subshell)
 not ok
 Calling aliases
-./reenv.bash.test: line 121: alias1: command not found
+./reenv.bash.test: line 126: alias1: command not found
 alias2
 alias3
 EOF
-)"
 
 # ==========================================================
-test "Help" "$(cat <<'EOF'
+test "Help" <<'EOF'
 reenv-base -h
 echo $?
 reenv-base --help
@@ -400,9 +383,7 @@ reenv-cap -h
 echo $?
 reenv-cap --help
 echo $?
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<'EOF'
+=== expected ===
 
 Reenv
 
@@ -448,33 +429,26 @@ See https://github.com/omakoto/reenv for more details.
 
 1
 EOF
-)"
 
 # ==========================================================
-test "Precheck success" "$(cat <<'EOF'
+test "Precheck success" <<'EOF'
 _reenv_pre_check
 echo $?
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<'EOF'
+=== expected ===
 0
 EOF
-)"
 
 # ==========================================================
-PATH=./ test "Precheck fail" "$(cat <<'EOF'
+PATH=./ test "Precheck fail" <<'EOF'
 _reenv_pre_check
 echo $?
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<'EOF'
+=== expected ===
 reenv: Requires `comm` command. Install with `apt install coreutils`.
 1
 EOF
-)"
 
 # ==========================================================
-test "Custom skip" "$(cat <<'EOF'
+test "Custom skip" <<'EOF'
 reenv-base
 
 REENV_SKIP="(2XXX|3YYY)"
@@ -493,9 +467,7 @@ func3YYY() {
 
 reenv-cap
 echo $?
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<'EOF'
+=== expected ===
 #f:func1()
 func1 () 
 { 
@@ -512,11 +484,10 @@ declare -g -- var1="abc"
 declare -g -- var2="def"
 0
 EOF
-)"
 
 
 # ==========================================================
-test "Quoting in deletion" "$(cat <<'EOF'
+test "Quoting in deletion" <<'EOF'
 # '[' is a valid function name in Bash but requires escaping.
 function [ () { :; }
 
@@ -527,17 +498,14 @@ unset -f [
 
 reenv-cap
 echo $?
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<'EOF'
+=== expected ===
 0
 unset -f \[
 0
 EOF
-)"
 
 
-test "Comm fallback" "$(cat <<'EOF'
+test "Comm fallback" <<'EOF'
 export var_to_del="bye"
 reenv-base
 echo $?
@@ -548,19 +516,16 @@ export REENV_USE_COMM_FALLBACK=1
 
 reenv-cap
 echo $?
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<'EOF'
+=== expected ===
 0
 unset -v var_to_del
 #v:var_to_add
 declare -g -x var_to_add="hello"
 0
 EOF
-)"
 
 
-test "Readonly override robustness" "$(cat <<'EOF'
+test "Readonly override robustness" <<'EOF'
 # 1. Baseline
 reenv-base > /dev/null
 
@@ -581,17 +546,14 @@ source /tmp/reenv-robust.sh
 # 5. Verify results
 echo "my_readonly: $my_readonly"
 echo "zz_after: $zz_after"
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<'EOF'
+=== expected ===
 /tmp/reenv-robust.sh: line 2: declare: my_readonly: readonly variable
 my_readonly: original
 zz_after: captured
 EOF
-)"
 
 
-test "Change REENV_SKIP after base" "$(cat <<'EOF'
+test "Change REENV_SKIP after base" <<'EOF'
 # 1. Baseline
 reenv-base > /dev/null
 
@@ -602,13 +564,10 @@ export REENV_SKIP="skip_me"
 
 # 3. Capture
 reenv-cap
-EOF
-# ---------------------------- end of eval -----------------------------
-)" "$(cat <<'EOF'
+=== expected ===
 #v:keep_me
 declare -g -x keep_me="hello"
 EOF
-)"
 
 
 # ==========================================================
