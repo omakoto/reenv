@@ -6,6 +6,7 @@ num_tests=0
 num_failure=0
 
 DIFF=/usr/bin/diff
+SED=$(type -p sed || echo /bin/sed)
 
 function green() {
     echo -en "\033[0;32m${*}\033[0m"
@@ -32,7 +33,10 @@ function test() {
     echo " $label"
     echo "----------------"
 
-    local actual="$(eval "$run" 2>&1)"
+    # Normalize script name and line numbers in errors to prevent test failures when the
+    # test script path or line counts change. Absolute path to sed is needed because some
+    # tests override PATH (e.g. "Precheck fail").
+    local actual="$(eval "$run" 2>&1 | $SED -E "s|.*/?reenv.bash.test: line [0-9]+:|reenv.bash.test: line ???:|g")"
     rc=$?
 
     $DIFF -Z -u <(echo -n "$expected") <(echo -n "$actual")
@@ -368,7 +372,7 @@ bash: line 1: func3: command not found
 Calling func4 (exported in subshell)
 not ok
 Calling aliases
-./reenv.bash.test: line 126: alias1: command not found
+reenv.bash.test: line ???: alias1: command not found
 alias2
 alias3
 EOF
