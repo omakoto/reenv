@@ -61,14 +61,11 @@ function _reenv_clear() {
 [[ -z "${_reenv_initialized:-}" ]] && _reenv_clear
 export _reenv_initialized=1
 
-function _reenv_init() {
-    _reenv_custom_skip="${REENV_SKIP:-}"
-}
-
 # Filter names using grep -E.
 function _reenv_filter() {
-    if [[ -n "$_reenv_custom_skip" ]]; then
-        grep -E -v "$_reenv_default_skip" | grep -E -v "$_reenv_custom_skip"
+    local custom_skip="${REENV_SKIP:-}"
+    if [[ -n "$custom_skip" ]]; then
+        grep -E -v "$_reenv_default_skip" | grep -E -v "$custom_skip"
     else
         grep -E -v "$_reenv_default_skip"
     fi
@@ -229,7 +226,6 @@ function _reenv_parse_args() {
 function reenv-base() {
     (
         set -e
-        _reenv_init
         _reenv_maybe_usage "$*" && return 1
         _reenv_parse_args "reenv-base" "$@" || return 1
 
@@ -247,7 +243,6 @@ function reenv-base() {
 function reenv-cap() {
     (
         set -e
-        _reenv_init
         _reenv_maybe_usage "$*" && return 1
         _reenv_parse_args "reenv-cap" "$@" || return 1
 
