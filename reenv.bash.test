@@ -575,6 +575,23 @@ EOF
 
 
 # ==========================================================
+test "set -u robustness" <<'EOF'
+set -u
+reenv-base > /dev/null
+echo "base $?"
+my_var="hello"
+reenv-cap
+echo "cap $?"
+set +u
+=== expected ===
+base 0
+#v:my_var
+declare -g -- my_var="hello"
+cap 0
+EOF
+
+
+# ==========================================================
 test "-b and -f options" <<'EOF'
 my_base="/tmp/test_base"
 my_cap="/tmp/test_cap"

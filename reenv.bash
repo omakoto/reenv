@@ -43,6 +43,15 @@ export _reenv_file_cur="${_reenv_file_cur:-$(mktemp "${TMPDIR:-/tmp}/reenv_cur.X
 export _reenv_file_unset_base="${_reenv_file_unset_base:-$(mktemp "${TMPDIR:-/tmp}/reenv_unset_base.XXXXXX")}"
 export _reenv_file_unset_cur="${_reenv_file_unset_cur:-$(mktemp "${TMPDIR:-/tmp}/reenv_unset_cur.XXXXXX")}"
 
+# Default ignore variables.
+_reenv_default_skip='^('
+_reenv_default_skip+='(reenv|_reenv|REENV|BASH|COMP).*|'
+_reenv_default_skip+='FUNCNAME|RANDOM|SRANDOM|EPOCHREALTIME|EPOCHSECONDS|SECONDS|'
+_reenv_default_skip+='USER|PWD|_|COLUMNS|LINES|'
+_reenv_default_skip+='EUID|PPID|SHELLOPTS|UID|GROUPS|SHLVL|LINENO|HISTCMD|PIPESTATUS|'
+_reenv_default_skip+='OPTIND|OPTARG|DIRSTACK'
+_reenv_default_skip+=')$'
+
 function _reenv_clear() {
     echo -n > "$_reenv_file_base"
     echo -n > "$_reenv_file_cur"
@@ -58,11 +67,10 @@ function _reenv_init() {
 
 # Filter names using grep -E.
 function _reenv_filter() {
-    local default_skip='^((reenv|_reenv|REENV|BASH).*|FUNCNAME|RANDOM|SRANDOM|EPOCHREALTIME|EPOCHSECONDS|SECONDS|USER|PWD|_|COLUMNS|LINES)$'
     if [[ -n "$_reenv_custom_skip" ]]; then
-        grep -E -v "$default_skip" | grep -E -v "$_reenv_custom_skip"
+        grep -E -v "$_reenv_default_skip" | grep -E -v "$_reenv_custom_skip"
     else
-        grep -E -v "$default_skip"
+        grep -E -v "$_reenv_default_skip"
     fi
 }
 
@@ -114,7 +122,7 @@ function _reenv_dump_unset() {
 }
 
 function _reenv_comm() {
-    if [[ "$REENV_USE_COMM_FALLBACK" == "1" ]]; then
+    if [[ "${REENV_USE_COMM_FALLBACK:-}" == "1" ]]; then
         _reenv_comm_z "$@"
     else
         LC_ALL=C comm -z "$@"
@@ -228,7 +236,7 @@ function reenv-base() {
         _reenv_dump > "$_reenv_active_base_file"
         _reenv_dump_unset > "$_reenv_active_unset_base_file"
 
-        if ! (( $_reenv_quiet )) ; then
+        if ! (( ${_reenv_quiet:-0} )) ; then
             echo "reenv: Captured baseline. Use reenv-cap to print the delta." 1>&2
         fi
     )
