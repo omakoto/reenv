@@ -18,10 +18,10 @@ This enables you to capture environment modifications (e.g., made within a subsh
     - [3. Exporting and Applying Aliases and Functions](#3-exporting-and-applying-aliases-and-functions)
   - [Configuration](#configuration)
     - [Excluding Variables (`REENV_SKIP`)](#excluding-variables-reenv_skip)
+  - [Advanced Usage](#advanced-usage)
+    - [Specifying Custom Base/Cap Files (`-b`, `-f`)](#specifying-custom-basecap-files--b--f)
   - [Running Tests](#running-tests)
   - [License](#license)
-
----
 
 ## Features
 
@@ -48,8 +48,6 @@ Simply clone the repository and source the script in your Bash shell or add it t
 ```bash
 source /path/to/reenv.bash
 ```
-
----
 
 ## What is NOT Captured
 
@@ -142,8 +140,6 @@ reenv-cap > /tmp/delta.sh
 ```
 Applying `/tmp/delta.sh` in another shell session will unset `SOME_OLD_VAR`, define `my_exported_func`, and call `export -f my_exported_func` to ensure it is available to child processes.
 
----
-
 ## Configuration
 
 `reenv` can be customized using the following environment variables:
@@ -161,7 +157,28 @@ export REENV_SKIP="(^TEMP_|_SECRET_)"
 reenv-base
 ```
 
----
+## Advanced Usage
+
+By default, `reenv` writes environment snapshots to temporary files. If you want to use specific files instead of the default temporary files, you can specify custom file paths using the `-b` and `-f` options.
+
+### Specifying Custom Base/Cap Files (`-b`, `-f`)
+
+- **In `reenv-base`**:
+  Use `-b FILENAME` to capture the baseline snapshot. This will save the baseline state into `FILENAME.sh` and the unset definitions into `FILENAME-clear.sh`.
+  ```bash
+  reenv-base -b /tmp/my_baseline
+  ```
+
+- **In `reenv-cap`**:
+  - Use `-b FILENAME` to load the baseline snapshot from `FILENAME.sh` and `FILENAME-clear.sh` instead of the default temporary files.
+  - Use `-f FILENAME` to save the "after" state snapshot into `FILENAME.sh` and `FILENAME-clear.sh`.
+
+  Note that `reenv-cap` still prints the generated environment delta to standard output, which you can redirect to a file or replay immediately:
+
+  ```bash
+  # Calculate delta comparing custom baseline and custom current snapshot, and save to a file
+  reenv-cap -b /tmp/my_baseline -f /tmp/my_current > /tmp/delta.sh
+  ```
 
 ## Running Tests
 
