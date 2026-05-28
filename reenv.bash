@@ -38,10 +38,10 @@ _reenv_pre_check || return 1 2>/dev/null || exit 1
 
 # Create temp files. We keep using the same files in the same shell
 # and all direct and indirect child processes.
-_reenv_file_base="${_reenv_file_base:-$(mktemp "${TMPDIR:-/tmp}/reenv_base.XXXXXX")}"
-_reenv_file_cur="${_reenv_file_cur:-$(mktemp "${TMPDIR:-/tmp}/reenv_cur.XXXXXX")}"
-_reenv_file_unset_base="${_reenv_file_unset_base:-$(mktemp "${TMPDIR:-/tmp}/reenv_unset_base.XXXXXX")}"
-_reenv_file_unset_cur="${_reenv_file_unset_cur:-$(mktemp "${TMPDIR:-/tmp}/reenv_unset_cur.XXXXXX")}"
+export _reenv_file_base="${_reenv_file_base:-$(mktemp "${TMPDIR:-/tmp}/reenv_base.XXXXXX")}"
+export _reenv_file_cur="${_reenv_file_cur:-$(mktemp "${TMPDIR:-/tmp}/reenv_cur.XXXXXX")}"
+export _reenv_file_unset_base="${_reenv_file_unset_base:-$(mktemp "${TMPDIR:-/tmp}/reenv_unset_base.XXXXXX")}"
+export _reenv_file_unset_cur="${_reenv_file_unset_cur:-$(mktemp "${TMPDIR:-/tmp}/reenv_unset_cur.XXXXXX")}"
 
 function _reenv_clear() {
     echo -n > "$_reenv_file_base"
@@ -49,7 +49,8 @@ function _reenv_clear() {
     echo -n > "$_reenv_file_unset_base"
     echo -n > "$_reenv_file_unset_cur"
 }
-_reenv_clear
+[[ -z "${_reenv_initialized:-}" ]] && _reenv_clear
+export _reenv_initialized=1
 
 function _reenv_init() {
     _reenv_custom_skip="${REENV_SKIP:-}"
