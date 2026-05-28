@@ -139,15 +139,93 @@ with open(f1, "rb") as h1, open(f2, "rb") as h2:
 ' "$mode" "$file1" "$file2"
 }
 
+_reenv_opt_base=""
+_reenv_opt_cur=""
+_reenv_active_base_file=""
+_reenv_active_unset_base_file=""
+_reenv_active_cur_file=""
+_reenv_active_unset_cur_file=""
+
+function _reenv_parse_args() {
+    _reenv_opt_base=""
+    _reenv_opt_cur=""
+    _reenv_active_base_file=""
+    _reenv_active_unset_base_file=""
+    _reenv_active_cur_file=""
+    _reenv_active_unset_cur_file=""
+
+    local _reenv_cmd="$1"
+    shift
+
+    local _reenv_options=""
+    if [[ "$_reenv_cmd" == "reenv-base" ]]; then
+        _reenv_options="b:"
+    elif [[ "$_reenv_cmd" == "reenv-cap" ]]; then
+        _reenv_options="b:f:"
+    fi
+
+    local _reenv_parsed
+    if ! _reenv_parsed=$(getopt -o "$_reenv_options" -- "$@"); then
+        return 1
+    fi
+    eval set -- "$_reenv_parsed"
+
+    while true; do
+        case "$1" in
+            -b)
+                _reenv_opt_base="$2"
+                shift 2
+                ;;
+            -f)
+                _reenv_opt_cur="$2"
+                shift 2
+                ;;
+            --)
+                shift
+                break
+                ;;
+            *)
+                echo "reenv: Internal option parsing error" 1>&2
+                return 1
+                ;;
+        esac
+    done
+
+    if [[ $# -gt 0 ]]; then
+        echo "reenv: Unexpected argument: $1" 1>&2
+        return 1
+    fi
+
+    # Set active filenames
+    if [[ -n "${_reenv_opt_base:-}" ]]; then
+        _reenv_active_base_file="${_reenv_opt_base}.sh"
+        _reenv_active_unset_base_file="${_reenv_opt_base}-clear.sh"
+    else
+        _reenv_active_base_file="$_reenv_file_base"
+        _reenv_active_unset_base_file="$_reenv_file_unset_base"
+    fi
+
+    if [[ -n "${_reenv_opt_cur:-}" ]]; then
+        _reenv_active_cur_file="${_reenv_opt_cur}.sh"
+        _reenv_active_unset_cur_file="${_reenv_opt_cur}-clear.sh"
+    else
+        _reenv_active_cur_file="$_reenv_file_cur"
+        _reenv_active_unset_cur_file="$_reenv_file_unset_cur"
+    fi
+
+    return 0
+}
+
 # Capture the "base" environment.
 function reenv-base() {
     (
         set -e
         _reenv_init
         _reenv_maybe_usage "$*" && return 1
+        _reenv_parse_args "reenv-base" "$@" || return 1
 
-        _reenv_dump > "$_reenv_file_base"
-        _reenv_dump_unset > "$_reenv_file_unset_base"
+        _reenv_dump > "$_reenv_active_base_file"
+        _reenv_dump_unset > "$_reenv_active_unset_base_file"
 
         if ! (( $_reenv_quiet )) ; then
             echo "reenv: Captured baseline. Use reenv-cap to print the delta." 1>&2
@@ -162,21 +240,22 @@ function reenv-cap() {
         set -e
         _reenv_init
         _reenv_maybe_usage "$*" && return 1
+        _reenv_parse_args "reenv-cap" "$@" || return 1
 
-        if ! [[ -s "$_reenv_file_base" ]] ; then
+        if ! [[ -s "$_reenv_active_base_file" ]] ; then
             echo "reenv: Use reenv-base to capture the base line environment first!" 1>&2
             return 1
         fi
 
-        _reenv_dump > "$_reenv_file_cur"
-        _reenv_dump_unset > "$_reenv_file_unset_cur"
+        _reenv_dump > "$_reenv_active_cur_file"
+        _reenv_dump_unset > "$_reenv_active_unset_cur_file"
 
         {
             # Dump deleted variables and functions with `unset`.
-            _reenv_comm -23 "$_reenv_file_unset_base" "$_reenv_file_unset_cur"
+            _reenv_comm -23 "$_reenv_active_unset_base_file" "$_reenv_active_unset_cur_file"
 
             # Dump added or changed variables and functions.
-            _reenv_comm -13 "$_reenv_file_base" "$_reenv_file_cur"
+            _reenv_comm -13 "$_reenv_active_base_file" "$_reenv_active_cur_file"
         } | tr -d '\0'
     )
 }

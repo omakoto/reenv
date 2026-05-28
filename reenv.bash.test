@@ -575,6 +575,83 @@ EOF
 
 
 # ==========================================================
+test "-b and -f options" <<'EOF'
+my_base="/tmp/test_base"
+my_cap="/tmp/test_cap"
+# Ensure we clean up any previous files
+rm -f "${my_base}.sh" "${my_base}-clear.sh" "${my_cap}.sh" "${my_cap}-clear.sh"
+
+changed=orig
+reenv-base -b "$my_base"
+echo $?
+
+# Verify base files were created and are not empty
+if [[ -s "${my_base}.sh" && -s "${my_base}-clear.sh" ]]; then
+    echo "Base files created successfully"
+else
+    echo "Base files missing or empty"
+fi
+
+aaa="abc"
+export XXX="xyz def"
+changed=new
+
+# Run cap with -b and -f
+reenv-cap -b "$my_base" -f "$my_cap"
+echo $?
+
+# Verify cap files were created and are not empty
+if [[ -s "${my_cap}.sh" && -s "${my_cap}-clear.sh" ]]; then
+    echo "Cap files created successfully"
+else
+    echo "Cap files missing or empty"
+fi
+
+# Clean up
+rm -f "${my_base}.sh" "${my_base}-clear.sh" "${my_cap}.sh" "${my_cap}-clear.sh"
+=== expected ===
+0
+Base files created successfully
+#v:XXX
+declare -g -x XXX="xyz def"
+#v:aaa
+declare -g -- aaa="abc"
+#v:changed
+declare -g -- changed="new"
+0
+Cap files created successfully
+EOF
+
+# ==========================================================
+test "-b and -f options invalid cases" <<'EOF'
+# 1. Invalid option to reenv-base
+reenv-base -z
+echo $?
+
+# 2. Unexpected positional argument to reenv-base
+reenv-base -b /tmp/foo extra_arg
+echo $?
+
+# 3. Missing base file for reenv-cap
+reenv-cap -b /tmp/nonexistent_base
+echo $?
+
+# 4. Invalid option to reenv-cap
+reenv-cap -z
+echo $?
+=== expected ===
+getopt: invalid option -- 'z'
+1
+reenv: Unexpected argument: extra_arg
+1
+reenv: Use reenv-base to capture the base line environment first!
+1
+getopt: invalid option -- 'z'
+1
+EOF
+
+
+# ==========================================================
 if (( $num_failure == 0 )) && (( $num_tests > 0 )) ; then
     green "ALL TESTS PASSED!"
     echo
