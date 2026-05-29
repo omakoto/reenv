@@ -19,6 +19,11 @@ EOF
     return 0
 }
 
+function doit() {
+    echo "$@" 1>&2
+    "$@"
+}
+
 # Check if we have all the necessary commands and correct Bash version
 function _reenv_pre_check() {
     # Check Bash version (requires 4.2+ for declare -g)
@@ -256,10 +261,10 @@ function reenv-cap() {
 
         {
             # Dump deleted variables and functions with `unset`.
-            _reenv_comm -23 "$_reenv_active_unset_base_file" "$_reenv_active_unset_cur_file"
+            doit _reenv_comm -23 "$_reenv_active_unset_base_file" "$_reenv_active_unset_cur_file"
 
             # Dump added or changed variables and functions.
-            _reenv_comm -13 "$_reenv_active_base_file" "$_reenv_active_cur_file"
+            doit _reenv_comm -13 "$_reenv_active_base_file" "$_reenv_active_cur_file"
         } | tr -d '\0'
     )
 }
