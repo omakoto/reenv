@@ -1,5 +1,6 @@
 #!/bin/bash
 
+unset _reenv_file_base _reenv_file_cur _reenv_file_unset_base _reenv_file_unset_cur _reenv_initialized
 . $(dirname "$0")/reenv.bash
 
 num_tests=0
@@ -36,7 +37,7 @@ function test() {
     # Normalize script name and line numbers in errors to prevent test failures when the
     # test script path or line counts change. Absolute path to sed is needed because some
     # tests override PATH (e.g. "Precheck fail").
-    local actual="$(eval "$run" 2>&1 | $SED -E "s|.*/?reenv.bash.test: line [0-9]+:|reenv.bash.test: line ???:|g")"
+    local actual="$(eval "$run" 2>&1 | $SED -E -e "s|.*/?reenv.bash.test: line [0-9]+:|reenv.bash.test: line ???:|g" -e "/^Dumping/d")"
     rc=$?
 
     $DIFF -Z -u <(echo -n "$expected") <(echo -n "$actual")

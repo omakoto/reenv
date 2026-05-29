@@ -20,7 +20,9 @@ EOF
 }
 
 function doit() {
-    echo "$@" 1>&2
+    if ! (( ${_reenv_quiet:-0} )) ; then
+        echo "$@" 1>&2
+    fi
     "$@"
 }
 
@@ -78,6 +80,10 @@ function _reenv_filter() {
 
 # Dump all variables and functions
 function _reenv_dump() {
+    local _reenv_file="$1"
+    if ! (( ${_reenv_quiet:-0} )) ; then
+        echo "Dumping to $_reenv_file..." 1>&2
+    fi
     {
         # Dump variables.
         compgen -v | _reenv_filter | while IFS= read -r name; do
@@ -99,11 +105,15 @@ function _reenv_dump() {
             alias "$name"
             printf '\0'
         done
-    } | LC_ALL=C sort -z
+    } | LC_ALL=C sort -z > "$_reenv_file"
 }
 
 # Dump all variables with `unset`. We use it to detect deleted entries.
 function _reenv_dump_unset() {
+    local _reenv_file="$1"
+    if ! (( ${_reenv_quiet:-0} )) ; then
+        echo "Dumping clear commands to $_reenv_file...." 1>&2
+    fi
     {
         compgen -v | _reenv_filter | while IFS= read -r name; do
             # Use double quotes just so it's easier to write the expected
@@ -120,7 +130,7 @@ function _reenv_dump_unset() {
         compgen -a | _reenv_filter | while IFS= read -r name; do
             printf "unalias %q\n\0" "$name"
         done
-    } | LC_ALL=C sort -z
+    } | LC_ALL=C sort -z > "$_reenv_file"
 }
 
 function _reenv_comm() {
@@ -234,8 +244,8 @@ function reenv-base() {
         _reenv_maybe_usage "$*" && return 1
         _reenv_parse_args "reenv-base" "$@" || return 1
 
-        _reenv_dump > "$_reenv_active_base_file"
-        _reenv_dump_unset > "$_reenv_active_unset_base_file"
+        _reenv_dump "$_reenv_active_base_file"
+        _reenv_dump_unset "$_reenv_active_unset_base_file"
 
         if ! (( ${_reenv_quiet:-0} )) ; then
             echo "reenv: Captured baseline. Use reenv-cap to print the delta." 1>&2
@@ -256,8 +266,8 @@ function reenv-cap() {
             return 1
         fi
 
-        _reenv_dump > "$_reenv_active_cur_file"
-        _reenv_dump_unset > "$_reenv_active_unset_cur_file"
+        _reenv_dump "$_reenv_active_cur_file"
+        _reenv_dump_unset "$_reenv_active_unset_cur_file"
 
         {
             # Dump deleted variables and functions with `unset`.
