@@ -112,6 +112,7 @@ function _reenv_dump() {
     fi
     {
         # Dump variables.
+        # Use sed to add `-g` to all `declare` commands.
         compgen -v | _reenv_filter | while IFS= read -r name; do
             echo "#v:$name"
             declare -p "$name"
