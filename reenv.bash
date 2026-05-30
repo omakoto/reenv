@@ -160,22 +160,22 @@ function _reenv_comm() {
     LC_ALL=C comm -z "$@"
 }
 
-_reenv_opt_base=""
-_reenv_opt_cur=""
-_reenv_opt_out=""
 _reenv_active_base_file=""
 _reenv_active_unset_base_file=""
 _reenv_active_cur_file=""
 _reenv_active_unset_cur_file=""
+_reenv_active_out_file=""
 
 function _reenv_parse_args() {
-    _reenv_opt_base=""
-    _reenv_opt_cur=""
-    _reenv_opt_out=""
+    local _reenv_opt_base=""
+    local _reenv_opt_cur=""
+    local _reenv_opt_out=""
+
     _reenv_active_base_file=""
     _reenv_active_unset_base_file=""
     _reenv_active_cur_file=""
     _reenv_active_unset_cur_file=""
+    _reenv_active_out_file=""
 
     local _reenv_cmd="$1"
     shift
@@ -240,6 +240,8 @@ function _reenv_parse_args() {
         _reenv_active_unset_cur_file="$_reenv_file_unset_cur"
     fi
 
+    _reenv_active_out_file="$_reenv_opt_out"
+
     return 0
 }
 
@@ -285,8 +287,8 @@ function reenv-cap() {
             } | tr -d '\0'
         }
 
-        if [[ -n "${_reenv_opt_out:-}" ]]; then
-            _reenv_cap_out_block > "$_reenv_opt_out"
+        if [[ -n "${_reenv_active_out_file:-}" ]]; then
+            _reenv_cap_out_block > "$_reenv_active_out_file"
         else
             _reenv_cap_out_block
         fi

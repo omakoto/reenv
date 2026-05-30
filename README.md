@@ -191,6 +191,9 @@ By default, `reenv` writes environment snapshots to temporary files. If you want
 - **No Internal/Incremental Deltas (e.g., `PATH` modifications)**:
   If a variable's value is modified (for example, appending a path to `PATH` using `export PATH="$PATH:/new/path"`), `reenv` captures and re-emits the entire new value of `PATH` (e.g., `declare -x PATH="...:/new/path"`). It does not detect the incremental change or output self-referential definitions like `export PATH="$PATH:/new/path"`.
 
+- **Local Variables Applied as Global**:
+  If a variable is local to an active shell function (i.e., declared with `local`), `reenv` captures its value at the time of tracking. However, when the generated delta script is replayed, all captured variables are re-applied as global variables (using `declare -g`).
+
 ## Running Tests
 
 `reenv` comes with a comprehensive test suite in `reenv.bash.test`. To run the tests, execute the script directly:
