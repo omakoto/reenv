@@ -41,7 +41,7 @@ EOF
 }
 
 function doit() {
-    if ! (( ${_reenv_quiet:-0} )) ; then
+    if (( ${_reenv_verbose:-0} )) ; then
         echo "$@" 1>&2
     fi
     "$@"
@@ -89,6 +89,10 @@ function _reenv_clear() {
 }
 [[ -z "${_reenv_initialized:-}" ]] && _reenv_clear
 export _reenv_initialized=1
+
+function _reenv_comm() {
+    LC_ALL=C comm -z "$@"
+}
 
 # Filter names using grep -E.
 function _reenv_filter() {
@@ -154,11 +158,7 @@ function _reenv_dump_unset() {
     } | LC_ALL=C sort -z > "$_reenv_file"
 }
 
-function _reenv_comm() {
-    LC_ALL=C comm -z "$@"
-}
-
-// The actual filenames used in reenv-base and reenv-cap.
+# The actual filenames used in reenv-base and reenv-cap.
 _reenv_active_base_file=""
 _reenv_active_unset_base_file=""
 _reenv_active_cur_file=""
