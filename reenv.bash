@@ -44,7 +44,8 @@ function _reenv_pre_check() {
 _reenv_pre_check || return 1 2>/dev/null || exit 1
 
 # Create temp files. We keep using the same files in the same shell
-# and all direct and indirect child processes.
+# and all direct and indirect child processes, so "cap" inside a child shell
+# would work too.
 export _reenv_file_base="${_reenv_file_base:-$(mktemp "${TMPDIR:-/tmp}/reenv_base.XXXXXX")}"
 export _reenv_file_cur="${_reenv_file_cur:-$(mktemp "${TMPDIR:-/tmp}/reenv_cur.XXXXXX")}"
 export _reenv_file_unset_base="${_reenv_file_unset_base:-$(mktemp "${TMPDIR:-/tmp}/reenv_unset_base.XXXXXX")}"
@@ -78,7 +79,7 @@ function _reenv_filter() {
     fi
 }
 
-# Dump all variables and functions
+# Dump all variables, functions, and aliases.
 function _reenv_dump() {
     local _reenv_file="$1"
     if ! (( ${_reenv_quiet:-0} )) ; then
@@ -108,7 +109,8 @@ function _reenv_dump() {
     } | LC_ALL=C sort -z > "$_reenv_file"
 }
 
-# Dump all variables with `unset`. We use it to detect deleted entries.
+# Dump all variables / etc with `unset`.
+# We use it to detect deleted entries.
 function _reenv_dump_unset() {
     local _reenv_file="$1"
     if ! (( ${_reenv_quiet:-0} )) ; then
@@ -134,30 +136,7 @@ function _reenv_dump_unset() {
 }
 
 function _reenv_comm() {
-    if [[ "${REENV_USE_COMM_FALLBACK:-}" == "1" ]]; then
-        _reenv_comm_z "$@"
-    else
-        LC_ALL=C comm -z "$@"
-    fi
-}
-
-# Simulate `comm -z` using python3, in case comm isn't installed.
-function _reenv_comm_z() {
-    local mode="$1"
-    local file1="$2"
-    local file2="$3"
-
-    python3 -c '
-import sys
-mode, f1, f2 = sys.argv[1:]
-with open(f1, "rb") as h1, open(f2, "rb") as h2:
-    s1 = set(h1.read().split(b"\0"))
-    s2 = set(h2.read().split(b"\0"))
-    res = s1 - s2 if mode == "-23" else s2 - s1
-    for line in sorted(res):
-        if line:
-            sys.stdout.buffer.write(line + b"\0")
-' "$mode" "$file1" "$file2"
+    LC_ALL=C comm -z "$@"
 }
 
 _reenv_opt_base=""

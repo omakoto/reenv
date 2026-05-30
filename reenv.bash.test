@@ -510,26 +510,6 @@ unset -f \[
 EOF
 
 
-test "Comm fallback" <<'EOF'
-export var_to_del="bye"
-reenv-base
-echo $?
-
-unset var_to_del
-export var_to_add="hello"
-export REENV_USE_COMM_FALLBACK=1
-
-reenv-cap
-echo $?
-=== expected ===
-0
-unset -v var_to_del
-#v:var_to_add
-declare -g -x var_to_add="hello"
-0
-EOF
-
-
 test "Readonly override robustness" <<'EOF'
 # 1. Baseline
 reenv-base > /dev/null
