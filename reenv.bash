@@ -158,6 +158,7 @@ function _reenv_comm() {
     LC_ALL=C comm -z "$@"
 }
 
+// The actual filenames used in reenv-base and reenv-cap.
 _reenv_active_base_file=""
 _reenv_active_unset_base_file=""
 _reenv_active_cur_file=""
@@ -221,24 +222,22 @@ function _reenv_parse_args() {
         return 1
     fi
 
-    # Set active filenames
-    if [[ -n "${_reenv_opt_base:-}" ]]; then
+    # Set active filenames (defaults first, override if option was given)
+    _reenv_active_base_file="$_reenv_file_base"
+    _reenv_active_unset_base_file="$_reenv_file_unset_base"
+    _reenv_active_cur_file="$_reenv_file_cur"
+    _reenv_active_unset_cur_file="$_reenv_file_unset_cur"
+    _reenv_active_out_file="$_reenv_opt_out"
+
+    if [[ -n "$_reenv_opt_base" ]]; then
         _reenv_active_base_file="${_reenv_opt_base}.sh"
         _reenv_active_unset_base_file="${_reenv_opt_base}-clear.sh"
-    else
-        _reenv_active_base_file="$_reenv_file_base"
-        _reenv_active_unset_base_file="$_reenv_file_unset_base"
     fi
 
-    if [[ -n "${_reenv_opt_cur:-}" ]]; then
+    if [[ -n "$_reenv_opt_cur" ]]; then
         _reenv_active_cur_file="${_reenv_opt_cur}.sh"
         _reenv_active_unset_cur_file="${_reenv_opt_cur}-clear.sh"
-    else
-        _reenv_active_cur_file="$_reenv_file_cur"
-        _reenv_active_unset_cur_file="$_reenv_file_unset_cur"
     fi
-
-    _reenv_active_out_file="$_reenv_opt_out"
 
     return 0
 }

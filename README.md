@@ -20,6 +20,7 @@ This enables you to capture environment modifications (e.g., made within a subsh
     - [Excluding Items (`REENV_SKIP`)](#excluding-items-reenv_skip)
   - [Advanced Usage](#advanced-usage)
     - [Specifying Custom Base/Cap/Output Files (`-b`, `-f`, `-o`)](#specifying-custom-basecapoutput-files--b--f--o)
+  - [Limitations](#limitations)
   - [Running Tests](#running-tests)
   - [License](#license)
 
