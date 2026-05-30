@@ -670,6 +670,46 @@ EOF
 
 
 # ==========================================================
+test "-o option for reenv-cap" <<'EOF'
+my_out="/tmp/reenv-test-out.sh"
+rm -f "$my_out"
+
+changed=orig
+reenv-base
+echo $?
+
+aaa="abc"
+export XXX="xyz def"
+changed=new
+
+# Run cap with -o
+reenv-cap -o "$my_out"
+echo $?
+
+# Verify output is empty and redirected to the file
+if [[ -f "$my_out" ]]; then
+    echo "Output file created"
+    cat "$my_out"
+else
+    echo "Output file NOT created"
+fi
+
+# Clean up
+rm -f "$my_out"
+=== expected ===
+0
+0
+Output file created
+#v:XXX
+declare -g -x XXX="xyz def"
+#v:aaa
+declare -g -- aaa="abc"
+#v:changed
+declare -g -- changed="new"
+EOF
+
+
+# ==========================================================
 if (( $num_failure == 0 )) && (( $num_tests > 0 )) ; then
     green "ALL TESTS PASSED!"
     echo

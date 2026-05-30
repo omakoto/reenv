@@ -172,12 +172,16 @@ By default, `reenv` writes environment snapshots to temporary files. If you want
 - **In `reenv-cap`**:
   - Use `-b FILENAME` to load the baseline snapshot from `FILENAME.sh` and `FILENAME-clear.sh` instead of the default temporary files.
   - Use `-f FILENAME` to save the "after" state snapshot into `FILENAME.sh` and `FILENAME-clear.sh`.
+  - Use `-o FILENAME` to write the generated environment delta directly to `FILENAME` instead of printing to standard output.
 
-  Note that `reenv-cap` still prints the generated environment delta to standard output, which you can redirect to a file or replay immediately:
+  If `-o` is not specified, `reenv-cap` prints the environment delta to standard output:
 
   ```bash
-  # Calculate delta comparing custom baseline and custom current snapshot, and save to a file
+  # Calculate delta comparing custom baseline and custom current snapshot, and redirect stdout to a file
   reenv-cap -b /tmp/my_baseline -f /tmp/my_current > /tmp/delta.sh
+
+  # Alternatively, write the delta directly using the -o option
+  reenv-cap -b /tmp/my_baseline -f /tmp/my_current -o /tmp/delta.sh
   ```
 
 ## Running Tests

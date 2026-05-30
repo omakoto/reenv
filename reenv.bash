@@ -162,6 +162,7 @@ with open(f1, "rb") as h1, open(f2, "rb") as h2:
 
 _reenv_opt_base=""
 _reenv_opt_cur=""
+_reenv_opt_out=""
 _reenv_active_base_file=""
 _reenv_active_unset_base_file=""
 _reenv_active_cur_file=""
@@ -170,6 +171,7 @@ _reenv_active_unset_cur_file=""
 function _reenv_parse_args() {
     _reenv_opt_base=""
     _reenv_opt_cur=""
+    _reenv_opt_out=""
     _reenv_active_base_file=""
     _reenv_active_unset_base_file=""
     _reenv_active_cur_file=""
@@ -182,7 +184,7 @@ function _reenv_parse_args() {
     if [[ "$_reenv_cmd" == "reenv-base" ]]; then
         _reenv_options="b:"
     elif [[ "$_reenv_cmd" == "reenv-cap" ]]; then
-        _reenv_options="b:f:"
+        _reenv_options="b:f:o:"
     fi
 
     local _reenv_parsed
@@ -199,6 +201,10 @@ function _reenv_parse_args() {
                 ;;
             -f)
                 _reenv_opt_cur="$2"
+                shift 2
+                ;;
+            -o)
+                _reenv_opt_out="$2"
                 shift 2
                 ;;
             --)
@@ -269,12 +275,20 @@ function reenv-cap() {
         _reenv_dump "$_reenv_active_cur_file"
         _reenv_dump_unset "$_reenv_active_unset_cur_file"
 
-        {
-            # Dump deleted variables and functions with `unset`.
-            doit _reenv_comm -23 "$_reenv_active_unset_base_file" "$_reenv_active_unset_cur_file"
+        _reenv_cap_out_block() {
+            {
+                # Dump deleted variables and functions with `unset`.
+                doit _reenv_comm -23 "$_reenv_active_unset_base_file" "$_reenv_active_unset_cur_file"
 
-            # Dump added or changed variables and functions.
-            doit _reenv_comm -13 "$_reenv_active_base_file" "$_reenv_active_cur_file"
-        } | tr -d '\0'
+                # Dump added or changed variables and functions.
+                doit _reenv_comm -13 "$_reenv_active_base_file" "$_reenv_active_cur_file"
+            } | tr -d '\0'
+        }
+
+        if [[ -n "${_reenv_opt_out:-}" ]]; then
+            _reenv_cap_out_block > "$_reenv_opt_out"
+        else
+            _reenv_cap_out_block
+        fi
     )
 }
