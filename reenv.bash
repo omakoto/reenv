@@ -170,12 +170,6 @@ function _reenv_parse_args() {
     local _reenv_opt_cur=""
     local _reenv_opt_out=""
 
-    _reenv_active_base_file=""
-    _reenv_active_unset_base_file=""
-    _reenv_active_cur_file=""
-    _reenv_active_unset_cur_file=""
-    _reenv_active_out_file=""
-
     local _reenv_cmd="$1"
     shift
 
