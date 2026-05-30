@@ -111,6 +111,24 @@ declare -g -- changed="new"
 EOF
 
 # ==========================================================
+test "Multiline variable containing declare" <<'EOF'
+reenv-base
+echo $?
+
+export multiline="first line
+declare is a command
+third line"
+
+reenv-cap
+echo $?
+=== expected ===
+0
+#v:multiline
+declare -g -x multiline=$'first line\ndeclare is a command\nthird line'
+0
+EOF
+
+# ==========================================================
 test "Complex change" <<'EOF'
 
 function a() {

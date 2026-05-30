@@ -1,9 +1,19 @@
 # Reenv: https://github.com/omakoto/reenv
 
 function _reenv_maybe_usage() {
-    if ! [[ "$1" == "-h" || "$1" == "--help" ]] ; then
+    local arg
+    local show_help=0
+    for arg in "$@"; do
+        if [[ "$arg" == "-h" || "$arg" == "--help" ]] ; then
+            show_help=1
+            break
+        fi
+    done
+
+    if (( ! show_help )); then
         return 1
     fi
+
     cat <<'EOF'
 
 Reenv
@@ -237,7 +247,7 @@ function _reenv_parse_args() {
 function reenv-base() {
     (
         set -e
-        _reenv_maybe_usage "$*" && return 1
+        _reenv_maybe_usage "$@" && return 1
         _reenv_parse_args "reenv-base" "$@" || return 1
 
         _reenv_dump "$_reenv_active_base_file"
@@ -254,7 +264,7 @@ function reenv-base() {
 function reenv-cap() {
     (
         set -e
-        _reenv_maybe_usage "$*" && return 1
+        _reenv_maybe_usage "$@" && return 1
         _reenv_parse_args "reenv-cap" "$@" || return 1
 
         if ! [[ -s "$_reenv_active_base_file" ]] ; then
