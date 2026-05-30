@@ -139,8 +139,6 @@ function _reenv_dump_unset() {
     fi
     {
         compgen -v | _reenv_filter | while IFS= read -r name; do
-            # Use double quotes just so it's easier to write the expected
-            # text in tests.
             printf "unset -v %q\n\0" "$name"
         done
 
@@ -249,7 +247,7 @@ function _reenv_parse_args() {
 function reenv-base() {
     (
         set -e
-        _reenv_maybe_usage "$@" && return 1
+        _reenv_maybe_usage "$@" && return 0
         _reenv_parse_args "reenv-base" "$@" || return 1
 
         _reenv_dump "$_reenv_active_base_file"
@@ -266,7 +264,7 @@ function reenv-base() {
 function reenv-cap() {
     (
         set -e
-        _reenv_maybe_usage "$@" && return 1
+        _reenv_maybe_usage "$@" && return 0
         _reenv_parse_args "reenv-cap" "$@" || return 1
 
         if ! [[ -s "$_reenv_active_base_file" ]] ; then
