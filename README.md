@@ -17,7 +17,7 @@ This enables you to capture environment modifications (e.g., made within a subsh
     - [2. Capturing Subshell Changes](#2-capturing-subshell-changes)
     - [3. Exporting and Applying Aliases and Functions](#3-exporting-and-applying-aliases-and-functions)
   - [Configuration](#configuration)
-    - [Excluding Variables (`REENV_SKIP`)](#excluding-variables-reenv_skip)
+    - [Excluding Items (`REENV_SKIP`)](#excluding-items-reenv_skip)
   - [Advanced Usage](#advanced-usage)
     - [Specifying Custom Base/Cap Files (`-b`, `-f`)](#specifying-custom-basecap-files--b--f)
   - [Running Tests](#running-tests)
@@ -144,7 +144,7 @@ Applying `/tmp/delta.sh` in another shell session will unset `SOME_OLD_VAR`, def
 
 `reenv` can be customized using the following environment variables:
 
-### Excluding Variables (`REENV_SKIP`)
+### Excluding Items (`REENV_SKIP`)
 By default, `reenv` ignores internal Bash variables and read-only shell attributes (e.g., `BASH_*`, `FUNCNAME`, `RANDOM`, `USER`, `PWD`, `COLUMNS`, etc.). 
 
 If you want to ignore additional variables or functions, define `REENV_SKIP` with a regular expression pattern matching their names:
@@ -183,6 +183,13 @@ By default, `reenv` writes environment snapshots to temporary files. If you want
   # Alternatively, write the delta directly using the -o option
   reenv-cap -b /tmp/my_baseline -f /tmp/my_current -o /tmp/delta.sh
   ```
+
+## Limitations
+
+`reenv` tracks entire environment states and variables rather than identifying changes *within* individual variables.
+
+- **No Internal/Incremental Deltas (e.g., `PATH` modifications)**:
+  If a variable's value is modified (for example, appending a path to `PATH` using `export PATH="$PATH:/new/path"`), `reenv` captures and re-emits the entire new value of `PATH` (e.g., `declare -x PATH="...:/new/path"`). It does not detect the incremental change or output self-referential definitions like `export PATH="$PATH:/new/path"`.
 
 ## Running Tests
 
