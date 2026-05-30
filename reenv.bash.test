@@ -392,10 +392,21 @@ echo $?
 
 Reenv
 
-Reenv tracks changes to the shell environment (variables and functions)
+Reenv tracks changes to the shell environment (variables, functions, and aliases)
 between two points in time and emits them as sourceable bash code.
 This lets you capture environment changes made in one shell and replay
 them in another.
+
+Usage:
+  reenv-base [-b BASELINE_NAME]
+      Capture baseline state of the environment.
+  reenv-cap [-b BASELINE_NAME] [-f CURRENT_NAME] [-o OUTPUT_FILE]
+      Print environment delta since the baseline state.
+
+Options:
+  -b BASELINE_NAME  Specify baseline snapshot name (default is temporary file)
+  -f CURRENT_NAME   Specify current snapshot name (default is temporary file)
+  -o OUTPUT_FILE    Write the environment delta to OUTPUT_FILE instead of stdout
 
 See https://github.com/omakoto/reenv for more details.
 
@@ -403,10 +414,21 @@ See https://github.com/omakoto/reenv for more details.
 
 Reenv
 
-Reenv tracks changes to the shell environment (variables and functions)
+Reenv tracks changes to the shell environment (variables, functions, and aliases)
 between two points in time and emits them as sourceable bash code.
 This lets you capture environment changes made in one shell and replay
 them in another.
+
+Usage:
+  reenv-base [-b BASELINE_NAME]
+      Capture baseline state of the environment.
+  reenv-cap [-b BASELINE_NAME] [-f CURRENT_NAME] [-o OUTPUT_FILE]
+      Print environment delta since the baseline state.
+
+Options:
+  -b BASELINE_NAME  Specify baseline snapshot name (default is temporary file)
+  -f CURRENT_NAME   Specify current snapshot name (default is temporary file)
+  -o OUTPUT_FILE    Write the environment delta to OUTPUT_FILE instead of stdout
 
 See https://github.com/omakoto/reenv for more details.
 
@@ -414,10 +436,21 @@ See https://github.com/omakoto/reenv for more details.
 
 Reenv
 
-Reenv tracks changes to the shell environment (variables and functions)
+Reenv tracks changes to the shell environment (variables, functions, and aliases)
 between two points in time and emits them as sourceable bash code.
 This lets you capture environment changes made in one shell and replay
 them in another.
+
+Usage:
+  reenv-base [-b BASELINE_NAME]
+      Capture baseline state of the environment.
+  reenv-cap [-b BASELINE_NAME] [-f CURRENT_NAME] [-o OUTPUT_FILE]
+      Print environment delta since the baseline state.
+
+Options:
+  -b BASELINE_NAME  Specify baseline snapshot name (default is temporary file)
+  -f CURRENT_NAME   Specify current snapshot name (default is temporary file)
+  -o OUTPUT_FILE    Write the environment delta to OUTPUT_FILE instead of stdout
 
 See https://github.com/omakoto/reenv for more details.
 
@@ -425,10 +458,21 @@ See https://github.com/omakoto/reenv for more details.
 
 Reenv
 
-Reenv tracks changes to the shell environment (variables and functions)
+Reenv tracks changes to the shell environment (variables, functions, and aliases)
 between two points in time and emits them as sourceable bash code.
 This lets you capture environment changes made in one shell and replay
 them in another.
+
+Usage:
+  reenv-base [-b BASELINE_NAME]
+      Capture baseline state of the environment.
+  reenv-cap [-b BASELINE_NAME] [-f CURRENT_NAME] [-o OUTPUT_FILE]
+      Print environment delta since the baseline state.
+
+Options:
+  -b BASELINE_NAME  Specify baseline snapshot name (default is temporary file)
+  -f CURRENT_NAME   Specify current snapshot name (default is temporary file)
+  -o OUTPUT_FILE    Write the environment delta to OUTPUT_FILE instead of stdout
 
 See https://github.com/omakoto/reenv for more details.
 
