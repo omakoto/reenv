@@ -1,6 +1,6 @@
 #!/bin/bash
 
-unset _reenv_file_base _reenv_file_cur _reenv_file_unset_base _reenv_file_unset_cur _reenv_initialized REENV_SKIP
+unset _reenv_file_base _reenv_file_cur _reenv_file_unset_base _reenv_file_unset_cur _reenv_initialized _reenv_verbose REENV_SKIP
 
 . "$(dirname "$0")/reenv.bash"
 
