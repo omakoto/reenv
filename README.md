@@ -19,7 +19,7 @@ This enables you to capture environment modifications (e.g., made within a subsh
   - [Configuration](#configuration)
     - [Excluding Items (`REENV_SKIP`)](#excluding-items-reenv_skip)
   - [Advanced Usage](#advanced-usage)
-    - [Specifying Custom Base/Cap Files (`-b`, `-f`)](#specifying-custom-basecap-files--b--f)
+    - [Specifying Custom Base/Cap/Output Files (`-b`, `-f`, `-o`)](#specifying-custom-basecapoutput-files--b--f--o)
   - [Running Tests](#running-tests)
   - [License](#license)
 
@@ -161,7 +161,7 @@ reenv-base
 
 By default, `reenv` writes environment snapshots to temporary files. If you want to use specific files instead of the default temporary files, you can specify custom file paths using the `-b` and `-f` options.
 
-### Specifying Custom Base/Cap Files (`-b`, `-f`)
+### Specifying Custom Base/Cap/Output Files (`-b`, `-f`, `-o`)
 
 - **In `reenv-base`**:
   Use `-b FILENAME` to capture the baseline snapshot. This will save the baseline state into `FILENAME.sh` and the unset definitions into `FILENAME-clear.sh`.
