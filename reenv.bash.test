@@ -904,6 +904,40 @@ EOF
 
 
 # ==========================================================
+run_test "reenv-sort basic sorting" <<'EOF'
+# 1. Unsorted single-line records
+echo "=== Unsorted single-line ==="
+echo -n -e "C\n###REENV###\nA\n###REENV###\nB\n###REENV###\n" | reenv-sort
+
+# 2. Unsorted multiline records
+echo "=== Unsorted multiline ==="
+echo -n -e "Z\nline2\n###REENV###\nA\nline2\n###REENV###\n" | reenv-sort
+
+# 3. Empty input
+echo "=== Empty input ==="
+echo -n "" | reenv-sort
+echo $?
+=== expected ===
+=== Unsorted single-line ===
+A
+###REENV###
+B
+###REENV###
+C
+###REENV###
+=== Unsorted multiline ===
+A
+line2
+###REENV###
+Z
+line2
+###REENV###
+=== Empty input ===
+0
+EOF
+
+
+# ==========================================================
 if (( $num_failure == 0 )) && (( $num_tests > 0 )) ; then
     green "ALL TESTS PASSED!"
     echo
