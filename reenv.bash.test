@@ -103,10 +103,13 @@ echo $?
 0
 #v:XXX
 declare -g -x XXX="xyz def"
+###REENV###
 #v:aaa
 declare -g -- aaa="abc"
+###REENV###
 #v:changed
 declare -g -- changed="new"
+###REENV###
 0
 EOF
 
@@ -125,6 +128,7 @@ echo $?
 0
 #v:multiline
 declare -g -x multiline=$'first line\ndeclare is a command\nthird line'
+###REENV###
 0
 EOF
 
@@ -161,18 +165,22 @@ echo $?
 alias BBB='
     echo BBB
 '
+###REENV###
 #f:a()
 a () 
 { 
     echo not ok
 }
+###REENV###
 #f:b()
 b () 
 { 
     echo "ok😄"
 }
+###REENV###
 #v:var
 declare -g -- var=$'X\nY\nZ'
+###REENV###
 0
 EOF
 
@@ -201,20 +209,26 @@ echo $?
 === expected ===
 0
 unalias alias2
+###REENV###
 unset -f func1
+###REENV###
 unset -v var1
+###REENV###
 #f:func2()
 func2 () 
 { 
     echo not ok
 }
+###REENV###
 #f:func3()
 func3 () 
 { 
     echo not ok
 }
+###REENV###
 #v:var3
 declare -g -- var3="ccc"
+###REENV###
 0
 EOF
 
@@ -319,31 +333,40 @@ alias3
 # Capture in subshell!
 --- Delta in subshell START ---
 unalias alias1
+###REENV###
 unset -f func1
+###REENV###
 unset -v var1
+###REENV###
 #a:alias3(alias)
 alias alias3='echo alias3'
+###REENV###
 #f:func2()
 func2 () 
 { 
     echo not ok
 }
 declare -fx func2
+###REENV###
 #f:func3()
 func3 () 
 { 
     echo not ok
 }
+###REENV###
 #f:func4()
 func4 () 
 { 
     echo not ok
 }
 declare -fx func4
+###REENV###
 #v:var2
 declare -g -- var2="bbb"
+###REENV###
 #v:var3
 declare -g -- var3=$'c\nc\nc'
+###REENV###
 0
 --- Delta in subshell END ---
 # Capture again, which should be empty
@@ -352,31 +375,40 @@ declare -g -- var3=$'c\nc\nc'
 0
 # Capture after apply
 unalias alias1
+###REENV###
 unset -f func1
+###REENV###
 unset -v var1
+###REENV###
 #a:alias3(alias)
 alias alias3='echo alias3'
+###REENV###
 #f:func2()
 func2 () 
 { 
     echo not ok
 }
 declare -fx func2
+###REENV###
 #f:func3()
 func3 () 
 { 
     echo not ok
 }
+###REENV###
 #f:func4()
 func4 () 
 { 
     echo not ok
 }
 declare -fx func4
+###REENV###
 #v:var2
 declare -g -- var2="bbb"
+###REENV###
 #v:var3
 declare -g -- var3=$'c\nc\nc'
+###REENV###
 0
 Calling func2
 not ok
@@ -510,7 +542,7 @@ PATH=./ run_test "Precheck fail" <<'EOF'
 _reenv_pre_check
 echo $?
 === expected ===
-reenv: Requires `comm` command. Install with `apt install coreutils`.
+reenv: Requires `python3`.
 1
 EOF
 
@@ -540,15 +572,19 @@ func1 ()
 { 
     :
 }
+###REENV###
 #f:func2()
 func2 () 
 { 
     :
 }
+###REENV###
 #v:var1
 declare -g -- var1="abc"
+###REENV###
 #v:var2
 declare -g -- var2="def"
+###REENV###
 0
 EOF
 
@@ -568,6 +604,7 @@ echo $?
 === expected ===
 0
 unset -f \[
+###REENV###
 0
 EOF
 
@@ -614,6 +651,7 @@ reenv-cap
 === expected ===
 #v:keep_me
 declare -g -x keep_me="hello"
+###REENV###
 EOF
 
 
@@ -630,6 +668,7 @@ set +u
 base 0
 #v:my_var
 declare -g -- my_var="hello"
+###REENV###
 cap 0
 EOF
 
@@ -674,10 +713,13 @@ rm -f "${my_base}.sh" "${my_base}-clear.sh" "${my_cap}.sh" "${my_cap}-clear.sh"
 Base files created successfully
 #v:XXX
 declare -g -x XXX="xyz def"
+###REENV###
 #v:aaa
 declare -g -- aaa="abc"
+###REENV###
 #v:changed
 declare -g -- changed="new"
+###REENV###
 0
 Cap files created successfully
 EOF
@@ -744,10 +786,13 @@ rm -f "$my_out"
 Output file created
 #v:XXX
 declare -g -x XXX="xyz def"
+###REENV###
 #v:aaa
 declare -g -- aaa="abc"
+###REENV###
 #v:changed
 declare -g -- changed="new"
+###REENV###
 EOF
 
 

@@ -55,8 +55,8 @@ function _reenv_pre_check() {
         return 1
     fi
 
-    if ! command -v comm >&/dev/null ; then
-        echo 'reenv: Requires `comm` command. Install with `apt install coreutils`.' 1>&2
+    if ! command -v python3 >&/dev/null ; then
+        echo 'reenv: Requires `python3`.' 1>&2
         return 1
     fi
     return 0
@@ -90,8 +90,103 @@ function _reenv_clear() {
 [[ -z "${_reenv_initialized:-}" ]] && _reenv_clear
 export _reenv_initialized=1
 
-function _reenv_comm() {
-    LC_ALL=C comm -z "$@"
+function reenv-sort() {
+    python3 -c '
+import sys
+content = sys.stdin.buffer.read()
+records = [r for r in content.split(b"###REENV###\n") if r]
+records.sort()
+if records:
+    sys.stdout.buffer.write(b"###REENV###\n".join(records) + b"###REENV###\n")
+'
+}
+
+function reenv-comm() {
+    python3 -c '
+import sys
+
+suppress1 = False
+suppress2 = False
+suppress3 = False
+
+files = []
+for arg in sys.argv[1:]:
+    if arg.startswith("-") and len(arg) > 1:
+        for char in arg[1:]:
+            if char == "1":
+                suppress1 = True
+            elif char == "2":
+                suppress2 = True
+            elif char == "3":
+                suppress3 = True
+            else:
+                sys.stderr.write(f"reenv-comm: invalid option -- {char}\n")
+                sys.exit(1)
+    else:
+        files.append(arg)
+
+if len(files) != 2:
+    sys.stderr.write("Usage: reenv-comm [-1] [-2] [-3] <file1> <file2>\n")
+    sys.exit(1)
+
+file1, file2 = files[0], files[1]
+
+try:
+    with open(file1, "rb") as f:
+        content1 = f.read()
+except Exception as e:
+    sys.stderr.write(f"reenv-comm: {file1}: {e}\n")
+    sys.exit(1)
+
+try:
+    with open(file2, "rb") as f:
+        content2 = f.read()
+except Exception as e:
+    sys.stderr.write(f"reenv-comm: {file2}: {e}\n")
+    sys.exit(1)
+
+records1 = [r for r in content1.split(b"###REENV###\n") if r]
+records2 = [r for r in content2.split(b"###REENV###\n") if r]
+
+def write_col(col, val):
+    if col == 1:
+        if suppress1:
+            return
+        prefix = b""
+    elif col == 2:
+        if suppress2:
+            return
+        prefix = b"" if suppress1 else b"\t"
+    else:
+        if suppress3:
+            return
+        p1 = b"" if suppress1 else b"\t"
+        p2 = b"" if suppress2 else b"\t"
+        prefix = p1 + p2
+    sys.stdout.buffer.write(prefix + val + b"###REENV###\n")
+
+i = 0
+j = 0
+while i < len(records1) and j < len(records2):
+    if records1[i] < records2[j]:
+        write_col(1, records1[i])
+        i += 1
+    elif records1[i] > records2[j]:
+        write_col(2, records2[j])
+        j += 1
+    else:
+        write_col(3, records1[i])
+        i += 1
+        j += 1
+
+while i < len(records1):
+    write_col(1, records1[i])
+    i += 1
+
+while j < len(records2):
+    write_col(2, records2[j])
+    j += 1
+' "$@"
 }
 
 # Filter names using grep -E.
@@ -116,23 +211,23 @@ function _reenv_dump() {
         compgen -v | _reenv_filter | while IFS= read -r name; do
             echo "#v:$name"
             declare -p "$name"
-            printf '\0'
+            printf '###REENV###\n'
         done | sed -e 's/^declare /declare -g /'
 
         # Dump functions.
         compgen -A function | _reenv_filter | while IFS= read -r name; do
             echo "#f:$name()"
             declare -p -f "$name"
-            printf '\0'
+            printf '###REENV###\n'
         done
 
         # Dump aliases.
         compgen -a | _reenv_filter | while IFS= read -r name; do
             echo "#a:$name(alias)"
             alias "$name"
-            printf '\0'
+            printf '###REENV###\n'
         done
-    } | LC_ALL=C sort -z > "$_reenv_file"
+    } | reenv-sort > "$_reenv_file"
 }
 
 # Dump all variables / etc with `unset`.
@@ -144,19 +239,19 @@ function _reenv_dump_unset() {
     fi
     {
         compgen -v | _reenv_filter | while IFS= read -r name; do
-            printf "unset -v %q\n\0" "$name"
+            printf "unset -v %q\n###REENV###\n" "$name"
         done
 
         # functions
         compgen -A function | _reenv_filter | while IFS= read -r name; do
-            printf "unset -f %q\n\0" "$name"
+            printf "unset -f %q\n###REENV###\n" "$name"
         done
 
         # aliases
         compgen -a | _reenv_filter | while IFS= read -r name; do
-            printf "unalias %q\n\0" "$name"
+            printf "unalias %q\n###REENV###\n" "$name"
         done
-    } | LC_ALL=C sort -z > "$_reenv_file"
+    } | reenv-sort > "$_reenv_file"
 }
 
 # The actual filenames used in reenv-base and reenv-cap.
@@ -270,13 +365,11 @@ function reenv-cap() {
         _reenv_dump_unset "$_reenv_active_unset_cur_file"
 
         _reenv_cap_out_block() {
-            {
-                # Dump deleted variables and functions with `unset`.
-                doit _reenv_comm -23 "$_reenv_active_unset_base_file" "$_reenv_active_unset_cur_file"
+            # Dump deleted variables and functions with `unset`.
+            doit reenv-comm -23 "$_reenv_active_unset_base_file" "$_reenv_active_unset_cur_file"
 
-                # Dump added or changed variables and functions.
-                doit _reenv_comm -13 "$_reenv_active_base_file" "$_reenv_active_cur_file"
-            } | tr -d '\0'
+            # Dump added or changed variables and functions.
+            doit reenv-comm -13 "$_reenv_active_base_file" "$_reenv_active_cur_file"
         }
 
         if [[ -n "${_reenv_active_out_file:-}" ]]; then

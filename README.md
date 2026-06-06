@@ -22,7 +22,6 @@ This enables you to capture environment modifications (e.g., made within a subsh
     - [Specifying Custom Base/Cap/Output Files (`-b`, `-f`, `-o`)](#specifying-custom-basecapoutput-files--b--f--o)
   - [Limitations](#limitations)
   - [Running Tests](#running-tests)
-  - [TODO](#todo)
   - [License](#license)
 
 ## Features
@@ -41,7 +40,7 @@ This enables you to capture environment modifications (e.g., made within a subsh
 ## Requirements
 
 - **Bash 4.2** or later (required for `declare -g` global declarations).
-- **GNU `comm`** (from `coreutils`. Reenv requires the `-z` flag).
+- **Python 3** (required for `reenv-sort` and `reenv-comm` implementations).
 
 ## Installation
 
@@ -57,15 +56,18 @@ source /path/to/reenv.bash
 
 - **System/Process State:**
   - File system changes (creation, modification, or deletion of files/directories).
-  - Background or foreground processes started during the session.
+  - Background or foreground processes started during the session, and background job lists/job control state.
   - Active file descriptors, network connections, or pipe/stream redirections.
-- **Shell Attributes & Settings:**
+- **Shell Attributes, Settings & Limits:**
   - The current working directory (e.g., calling `cd` changes directory, but the directory path changes are not captured as `cd` commands; `PWD` itself is ignored by default).
   - Active shell options (e.g., flags set via `shopt` or `set -o`).
+  - Shell resource limits (set via `ulimit`).
   - The file creation mask (`umask`).
   - Signal trap handlers (`trap`).
   - Terminal settings (`stty`).
-- **Ignored Variables:**
+- **Ignored Variables & Parameters:**
+  - Positional parameters (`$1`, `$2`, etc., and `$#`, `$@`, `$*`).
+  - Special shell parameters (e.g., `$IFS`, `$!`, `$?`, `$$-pid`).
   - Read-only shell variables and internal Bash/environment variables (e.g., `BASH_*`, `FUNCNAME`, `RANDOM`, `USER`, `SECONDS`, etc., which are filtered out to prevent corruption during replay).
 
 ## Usage Guide
@@ -204,9 +206,6 @@ By default, `reenv` writes environment snapshots to temporary files. If you want
 ./reenv.bash.test
 ```
 
-## TODO
-
-- Stop using `\0` as a field separator. Instead, use `###REENV###`. So do this, we stop using the `sort` and `comm`. Instead, create shell functions `reenv-sort` and `reenv-comm`, and use python in them to implement them.
 
 ## License
 
