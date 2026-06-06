@@ -7,6 +7,7 @@ This enables you to capture environment modifications (e.g., made within a subsh
 ## Table of Contents
 - [reenv](#reenv)
   - [Table of Contents](#table-of-contents)
+  - [TL;DR;](#tldr)
   - [Features](#features)
   - [How it Works](#how-it-works)
   - [Requirements](#requirements)
@@ -23,6 +24,29 @@ This enables you to capture environment modifications (e.g., made within a subsh
   - [Limitations](#limitations)
   - [Running Tests](#running-tests)
   - [License](#license)
+
+## TL;DR;
+
+```bash
+# 0. Source reenv
+. /path/to/reenv.bash
+
+# 1. Initialize baseline snapshot
+reenv-base
+
+# 2. Modify environment (variables, functions, aliases)
+export MY_VAR="hello"
+my_func() { echo "world"; }
+alias my_alias="echo hello world"
+
+# 3. Capture changes to a file
+reenv-cap > delta.sh
+
+# ... Later, in another terminal...
+
+# 4. Apply changes in another shell session
+source delta.sh
+```
 
 ## Features
 
