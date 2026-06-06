@@ -797,6 +797,113 @@ EOF
 
 
 # ==========================================================
+run_test "reenv-comm option combos" <<'EOF'
+file1="/tmp/comm_test1"
+file2="/tmp/comm_test2"
+echo -n -e "A\n###REENV###\nB\n###REENV###\n" > "$file1"
+echo -n -e "B\n###REENV###\nC\n###REENV###\n" > "$file2"
+
+# 1. No options
+echo "=== No options ==="
+reenv-comm "$file1" "$file2" | sed -e 's/\t/[TAB]/g'
+
+# 2. Option -1
+echo "=== Option -1 ==="
+reenv-comm -1 "$file1" "$file2" | sed -e 's/\t/[TAB]/g'
+
+# 3. Option -2
+echo "=== Option -2 ==="
+reenv-comm -2 "$file1" "$file2" | sed -e 's/\t/[TAB]/g'
+
+# 4. Option -3
+echo "=== Option -3 ==="
+reenv-comm -3 "$file1" "$file2" | sed -e 's/\t/[TAB]/g'
+
+# 5. Option -12
+echo "=== Option -12 ==="
+reenv-comm -12 "$file1" "$file2" | sed -e 's/\t/[TAB]/g'
+
+# 6. Option -13
+echo "=== Option -13 ==="
+reenv-comm -13 "$file1" "$file2" | sed -e 's/\t/[TAB]/g'
+
+# 7. Option -23
+echo "=== Option -23 ==="
+reenv-comm -23 "$file1" "$file2" | sed -e 's/\t/[TAB]/g'
+
+# 8. Option -2 -3
+echo "=== Option -2 -3 ==="
+reenv-comm -2 -3 "$file1" "$file2" | sed -e 's/\t/[TAB]/g'
+
+# 9. Option -123
+echo "=== Option -123 ==="
+reenv-comm -123 "$file1" "$file2" | sed -e 's/\t/[TAB]/g'
+
+# 10. Invalid option
+echo "=== Option -z ==="
+reenv-comm -z "$file1" "$file2" 2>&1
+echo $?
+
+# 11. Missing arguments (1 file)
+echo "=== 1 file ==="
+reenv-comm "$file1" 2>&1
+echo $?
+
+# 12. Missing arguments (no files)
+echo "=== no files ==="
+reenv-comm 2>&1
+echo $?
+
+rm -f "$file1" "$file2"
+=== expected ===
+=== No options ===
+A
+###REENV###
+[TAB][TAB]B
+###REENV###
+[TAB]C
+###REENV###
+=== Option -1 ===
+[TAB]B
+###REENV###
+C
+###REENV###
+=== Option -2 ===
+A
+###REENV###
+[TAB]B
+###REENV###
+=== Option -3 ===
+A
+###REENV###
+[TAB]C
+###REENV###
+=== Option -12 ===
+B
+###REENV###
+=== Option -13 ===
+C
+###REENV###
+=== Option -23 ===
+A
+###REENV###
+=== Option -2 -3 ===
+A
+###REENV###
+=== Option -123 ===
+=== Option -z ===
+reenv-comm: invalid option -- z
+1
+=== 1 file ===
+Usage: reenv-comm [-1] [-2] [-3] <file1> <file2>
+1
+=== no files ===
+Usage: reenv-comm [-1] [-2] [-3] <file1> <file2>
+1
+EOF
+
+
+# ==========================================================
 if (( $num_failure == 0 )) && (( $num_tests > 0 )) ; then
     green "ALL TESTS PASSED!"
     echo
