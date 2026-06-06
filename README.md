@@ -22,6 +22,7 @@ This enables you to capture environment modifications (e.g., made within a subsh
     - [Specifying Custom Base/Cap/Output Files (`-b`, `-f`, `-o`)](#specifying-custom-basecapoutput-files--b--f--o)
   - [Limitations](#limitations)
   - [Running Tests](#running-tests)
+  - [TODO](#todo)
   - [License](#license)
 
 ## Features
@@ -202,6 +203,10 @@ By default, `reenv` writes environment snapshots to temporary files. If you want
 ```bash
 ./reenv.bash.test
 ```
+
+## TODO
+
+- Stop using `\0` as a field separator. Instead, use `###REENV###`. So do this, we stop using the `sort` and `comm`. Instead, create shell functions `reenv-sort` and `reenv-comm`, and use python in them to implement them.
 
 ## License
 
