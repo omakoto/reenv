@@ -90,21 +90,31 @@ function _reenv_clear() {
 [[ -z "${_reenv_initialized:-}" ]] && _reenv_clear
 export _reenv_initialized=1
 
+# Sort records separated by ###REENV###.
+# Uses Python's list.sort() on bytes to guarantee LC_ALL=C byte-order sorting.
 function reenv-sort() {
     python3 -c '
 import sys
+# Read entire stdin as bytes
 content = sys.stdin.buffer.read()
+# Split by record separator and filter out empty records
 records = [r for r in content.split(b"###REENV###\n") if r]
+# Sort records lexicographically by byte values (LC_ALL=C equivalent)
 records.sort()
+# Write sorted records back with the separator
 if records:
     sys.stdout.buffer.write(b"###REENV###\n".join(records) + b"###REENV###\n")
 '
 }
 
+# Compare two sorted files whose records are separated by ###REENV###.
+# Implements GNU comm behavior (handling option combinations -1, -2, -3).
+# Uses Python to process byte comparisons, ensuring LC_ALL=C comparison.
 function reenv-comm() {
     python3 -c '
 import sys
 
+# Parse options to suppress specific columns
 suppress1 = False
 suppress2 = False
 suppress3 = False
@@ -131,6 +141,7 @@ if len(files) != 2:
 
 file1, file2 = files[0], files[1]
 
+# Load file contents
 try:
     with open(file1, "rb") as f:
         content1 = f.read()
@@ -145,9 +156,11 @@ except Exception as e:
     sys.stderr.write(f"reenv-comm: {file2}: {e}\n")
     sys.exit(1)
 
+# Split contents into records
 records1 = [r for r in content1.split(b"###REENV###\n") if r]
 records2 = [r for r in content2.split(b"###REENV###\n") if r]
 
+# Helper to write output matching comm columns and indentation
 def write_col(col, val):
     if col == 1:
         if suppress1:
@@ -165,6 +178,7 @@ def write_col(col, val):
         prefix = p1 + p2
     sys.stdout.buffer.write(prefix + val + b"###REENV###\n")
 
+# Standard two-pointer comm comparison on sorted lists of bytes
 i = 0
 j = 0
 while i < len(records1) and j < len(records2):
@@ -179,6 +193,7 @@ while i < len(records1) and j < len(records2):
         i += 1
         j += 1
 
+# Process remaining records
 while i < len(records1):
     write_col(1, records1[i])
     i += 1
