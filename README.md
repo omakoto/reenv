@@ -83,7 +83,7 @@ source /path/to/reenv.bash
   - Background or foreground processes started during the session, and background job lists/job control state.
   - Active file descriptors, network connections, or pipe/stream redirections.
 - **Shell Attributes, Settings & Limits:**
-  - The current working directory (e.g., calling `cd` changes directory, but the directory path changes are not captured as `cd` commands; `PWD` itself is ignored by default).
+  - The current working directory (e.g., calling `cd` changes directory, but the directory path changes are not captured as `cd` commands; `PWD` and `OLDPWD` are ignored by default).
   - Active shell options (e.g., flags set via `shopt` or `set -o`).
   - Shell resource limits (set via `ulimit`).
   - The file creation mask (`umask`).

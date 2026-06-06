@@ -590,6 +590,34 @@ EOF
 
 
 # ==========================================================
+run_test "Implicit skip" <<'EOF'
+reenv-base
+echo $?
+
+IFS=":"
+RANDOM=123
+SECONDS=456
+USER="another_user"
+PWD="/another/pwd"
+OLDPWD="/another/oldpwd"
+SHLVL=99
+BASH_SOME_VAR="bash"
+reenv_some_var="reenv"
+
+var_captured="should_capture"
+
+reenv-cap
+echo $?
+=== expected ===
+0
+#v:var_captured
+declare -g -- var_captured="should_capture"
+###REENV###
+0
+EOF
+
+
+# ==========================================================
 run_test "Quoting in deletion" <<'EOF'
 # '[' is a valid function name in Bash but requires escaping.
 function [ () { :; }
