@@ -95,6 +95,9 @@ export _reenv_initialized=1
 function reenv-sort() {
     python3 -c '
 import sys
+if "-h" in sys.argv[1:] or "--help" in sys.argv[1:]:
+    print("sort tool used by reenv")
+    sys.exit(0)
 # Read entire stdin as bytes
 content = sys.stdin.buffer.read()
 # Split by record separator and filter out empty records
@@ -104,7 +107,7 @@ records.sort()
 # Write sorted records back with the separator
 if records:
     sys.stdout.buffer.write(b"###REENV###\n".join(records) + b"###REENV###\n")
-'
+' "$@"
 }
 
 # Compare two sorted files whose records are separated by ###REENV###.
@@ -113,6 +116,9 @@ if records:
 function reenv-comm() {
     python3 -c '
 import sys
+if "-h" in sys.argv[1:] or "--help" in sys.argv[1:]:
+    print("comm(1) equivalent tool used by reenv")
+    sys.exit(0)
 
 # Parse options to suppress specific columns
 suppress1 = False

@@ -882,6 +882,16 @@ echo "=== no files ==="
 reenv-comm 2>&1
 echo $?
 
+# 13. Help option -h
+echo "=== Option -h ==="
+reenv-comm -h 2>&1
+echo $?
+
+# 14. Help option --help
+echo "=== Option --help ==="
+reenv-comm --help 2>&1
+echo $?
+
 rm -f "$file1" "$file2"
 === expected ===
 === No options ===
@@ -928,6 +938,12 @@ Usage: reenv-comm [-1] [-2] [-3] <file1> <file2>
 === no files ===
 Usage: reenv-comm [-1] [-2] [-3] <file1> <file2>
 1
+=== Option -h ===
+comm(1) equivalent tool used by reenv
+0
+=== Option --help ===
+comm(1) equivalent tool used by reenv
+0
 EOF
 
 
@@ -945,6 +961,16 @@ echo -n -e "Z\nline2\n###REENV###\nA\nline2\n###REENV###\n" | reenv-sort
 echo "=== Empty input ==="
 echo -n "" | reenv-sort
 echo $?
+
+# 4. Help option -h
+echo "=== Option -h ==="
+reenv-sort -h 2>&1
+echo $?
+
+# 5. Help option --help
+echo "=== Option --help ==="
+reenv-sort --help 2>&1
+echo $?
 === expected ===
 === Unsorted single-line ===
 A
@@ -961,6 +987,12 @@ Z
 line2
 ###REENV###
 === Empty input ===
+0
+=== Option -h ===
+sort tool used by reenv
+0
+=== Option --help ===
+sort tool used by reenv
 0
 EOF
 
