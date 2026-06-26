@@ -248,6 +248,18 @@ function _reenv_dump() {
             alias "$name"
             printf '###REENV###\n'
         done
+
+        # Dump completions.
+        complete -p 2>/dev/null | while IFS= read -r line; do
+            local -a args
+            eval "args=( $line )"
+            local name="${args[-1]}"
+            if echo "$name" | _reenv_filter >/dev/null; then
+                echo "#c:$name(completion)"
+                echo "$line"
+                printf '###REENV###\n'
+            fi
+        done
     } | reenv-sort > "$_reenv_file"
 }
 
@@ -271,6 +283,16 @@ function _reenv_dump_unset() {
         # aliases
         compgen -a | _reenv_filter | while IFS= read -r name; do
             printf "unalias %q\n###REENV###\n" "$name"
+        done
+
+        # completions
+        complete -p 2>/dev/null | while IFS= read -r line; do
+            local -a args
+            eval "args=( $line )"
+            local name="${args[-1]}"
+            if echo "$name" | _reenv_filter >/dev/null; then
+                printf "complete -r %q\n###REENV###\n" "$name"
+            fi
         done
     } | reenv-sort > "$_reenv_file"
 }

@@ -998,6 +998,109 @@ EOF
 
 
 # ==========================================================
+run_test "Completions support" <<'EOF'
+# Define dummy helper functions
+_helper_old() { :; }
+_helper_del() { :; }
+_helper_skip() { :; }
+_helper_add() { :; }
+_helper_new() { :; }
+_helper_default() { :; }
+_helper_empty() { :; }
+
+# Setup initial completions
+complete -r cmd_add 2>/dev/null
+complete -r cmd_mod 2>/dev/null
+complete -r cmd_del 2>/dev/null
+complete -r cmd_skip 2>/dev/null
+complete -r -D 2>/dev/null
+complete -r -E 2>/dev/null
+
+complete -F _helper_old cmd_mod
+complete -F _helper_del cmd_del
+complete -F _helper_skip cmd_skip
+
+export REENV_SKIP="cmd_skip"
+reenv-base
+echo "base $?"
+
+# Modify completions
+complete -F _helper_add cmd_add
+complete -F _helper_new cmd_mod
+complete -r cmd_del
+complete -F _helper_default -D
+complete -F _helper_empty -E
+
+# Capture delta
+reenv-cap > /tmp/reenv-test-comp.sh
+echo "cap $?"
+
+# Print delta content for assertion
+cat /tmp/reenv-test-comp.sh
+
+# Reset completions to a different state (or back to base)
+complete -r cmd_add 2>/dev/null
+complete -r cmd_mod 2>/dev/null
+complete -r cmd_del 2>/dev/null
+complete -r cmd_skip 2>/dev/null
+complete -r -D 2>/dev/null
+complete -r -E 2>/dev/null
+
+complete -F _helper_old cmd_mod
+complete -F _helper_del cmd_del
+complete -F _helper_skip cmd_skip
+
+# Apply the delta
+source /tmp/reenv-test-comp.sh
+echo "apply $?"
+
+# Verify completions after applying
+echo "--- Results ---"
+complete -p cmd_add 2>/dev/null || echo "cmd_add not found"
+complete -p cmd_mod 2>/dev/null || echo "cmd_mod not found"
+complete -p cmd_del 2>/dev/null || echo "cmd_del not found"
+complete -p cmd_skip 2>/dev/null || echo "cmd_skip not found"
+complete -p -D 2>/dev/null || echo "default not found"
+complete -p -E 2>/dev/null || echo "empty not found"
+
+# Clean up
+complete -r cmd_add 2>/dev/null
+complete -r cmd_mod 2>/dev/null
+complete -r cmd_del 2>/dev/null
+complete -r cmd_skip 2>/dev/null
+complete -r -D 2>/dev/null
+complete -r -E 2>/dev/null
+unset REENV_SKIP
+rm -f /tmp/reenv-test-comp.sh
+=== expected ===
+base 0
+cap 0
+complete -r cmd_del
+###REENV###
+#c:-D(completion)
+complete -F _helper_default -D
+###REENV###
+#c:-E(completion)
+complete -F _helper_empty -E
+###REENV###
+#c:cmd_add(completion)
+complete -F _helper_add cmd_add
+###REENV###
+#c:cmd_mod(completion)
+complete -F _helper_new cmd_mod
+###REENV###
+apply 0
+--- Results ---
+complete -F _helper_add cmd_add
+complete -F _helper_new cmd_mod
+cmd_del not found
+complete -F _helper_skip cmd_skip
+complete -F _helper_default -D
+complete -F _helper_empty -E
+EOF
+
+
+# ==========================================================
 if (( $num_failure == 0 )) && (( $num_tests > 0 )) ; then
     green "ALL TESTS PASSED!"
     echo
