@@ -1013,12 +1013,18 @@ complete -r cmd_add 2>/dev/null
 complete -r cmd_mod 2>/dev/null
 complete -r cmd_del 2>/dev/null
 complete -r cmd_skip 2>/dev/null
+complete -r /etc/init.d/plymouth-log 2>/dev/null
+complete -r gg 2>/dev/null
+complete -r go 2>/dev/null
+complete -r builtin 2>/dev/null
+complete -r slay 2>/dev/null
 complete -r -D 2>/dev/null
 complete -r -E 2>/dev/null
 
 complete -F _helper_old cmd_mod
 complete -F _helper_del cmd_del
 complete -F _helper_skip cmd_skip
+complete -F _comp_complete_service /etc/init.d/plymouth-log
 
 export REENV_SKIP="cmd_skip"
 reenv-base
@@ -1028,6 +1034,11 @@ echo "base $?"
 complete -F _helper_add cmd_add
 complete -F _helper_new cmd_mod
 complete -r cmd_del
+complete -r /etc/init.d/plymouth-log
+complete -o bashdefault -o filenames -F _git_meld_history gg
+complete -C '/home/omakoto/go/bin/gocomplete' go
+complete -b builtin
+complete -u slay
 complete -F _helper_default -D
 complete -F _helper_empty -E
 
@@ -1043,12 +1054,18 @@ complete -r cmd_add 2>/dev/null
 complete -r cmd_mod 2>/dev/null
 complete -r cmd_del 2>/dev/null
 complete -r cmd_skip 2>/dev/null
+complete -r /etc/init.d/plymouth-log 2>/dev/null
+complete -r gg 2>/dev/null
+complete -r go 2>/dev/null
+complete -r builtin 2>/dev/null
+complete -r slay 2>/dev/null
 complete -r -D 2>/dev/null
 complete -r -E 2>/dev/null
 
 complete -F _helper_old cmd_mod
 complete -F _helper_del cmd_del
 complete -F _helper_skip cmd_skip
+complete -F _comp_complete_service /etc/init.d/plymouth-log
 
 # Apply the delta
 source /tmp/reenv-test-comp.sh
@@ -1056,10 +1073,15 @@ echo "apply $?"
 
 # Verify completions after applying
 echo "--- Results ---"
+complete -p /etc/init.d/plymouth-log 2>/dev/null || echo "plymouth-log not found"
 complete -p cmd_add 2>/dev/null || echo "cmd_add not found"
 complete -p cmd_mod 2>/dev/null || echo "cmd_mod not found"
 complete -p cmd_del 2>/dev/null || echo "cmd_del not found"
 complete -p cmd_skip 2>/dev/null || echo "cmd_skip not found"
+complete -p gg 2>/dev/null || echo "gg not found"
+complete -p go 2>/dev/null || echo "go not found"
+complete -p builtin 2>/dev/null || echo "builtin not found"
+complete -p slay 2>/dev/null || echo "slay not found"
 complete -p -D 2>/dev/null || echo "default not found"
 complete -p -E 2>/dev/null || echo "empty not found"
 
@@ -1068,6 +1090,11 @@ complete -r cmd_add 2>/dev/null
 complete -r cmd_mod 2>/dev/null
 complete -r cmd_del 2>/dev/null
 complete -r cmd_skip 2>/dev/null
+complete -r /etc/init.d/plymouth-log 2>/dev/null
+complete -r gg 2>/dev/null
+complete -r go 2>/dev/null
+complete -r builtin 2>/dev/null
+complete -r slay 2>/dev/null
 complete -r -D 2>/dev/null
 complete -r -E 2>/dev/null
 unset REENV_SKIP
@@ -1075,6 +1102,8 @@ rm -f /tmp/reenv-test-comp.sh
 === expected ===
 base 0
 cap 0
+complete -r /etc/init.d/plymouth-log
+###REENV###
 complete -r cmd_del
 ###REENV###
 #c:-D(completion)
@@ -1083,18 +1112,35 @@ complete -F _helper_default -D
 #c:-E(completion)
 complete -F _helper_empty -E
 ###REENV###
+#c:builtin(completion)
+complete -b builtin
+###REENV###
 #c:cmd_add(completion)
 complete -F _helper_add cmd_add
 ###REENV###
 #c:cmd_mod(completion)
 complete -F _helper_new cmd_mod
 ###REENV###
+#c:gg(completion)
+complete -o bashdefault -o filenames -F _git_meld_history gg
+###REENV###
+#c:go(completion)
+complete -C '/home/omakoto/go/bin/gocomplete' go
+###REENV###
+#c:slay(completion)
+complete -u slay
+###REENV###
 apply 0
 --- Results ---
+plymouth-log not found
 complete -F _helper_add cmd_add
 complete -F _helper_new cmd_mod
 cmd_del not found
 complete -F _helper_skip cmd_skip
+complete -o bashdefault -o filenames -F _git_meld_history gg
+complete -C '/home/omakoto/go/bin/gocomplete' go
+complete -b builtin
+complete -u slay
 complete -F _helper_default -D
 complete -F _helper_empty -E
 EOF
