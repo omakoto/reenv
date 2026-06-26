@@ -231,6 +231,41 @@ By default, `reenv` writes environment snapshots to temporary files. If you want
 ```
 
 
+## Potentially Supportable Shell Attributes
+
+The following shell attributes are currently listed under "What is NOT Captured" but are technically viable candidates for future support:
+
+### 1. Shell Options (`shopt` and `set -o` / `set +o`)
+- **Save/Restore**: 
+  - Save: Query active options using `shopt -p` and standard shell flags using `set +o`.
+  - Restore: Emit changed options directly (e.g., `shopt -s autocd` or `set -o history`).
+- **Caveats**: Some shell options might change behavior in ways that disrupt the sourced script execution itself (e.g., `errexit` or `nounset`), so care must be taken when re-applying them.
+
+### 2. Signal Trap Handlers (`trap`)
+- **Save/Restore**:
+  - Save: Query active signal traps via `trap -p`.
+  - Restore: Reset removed traps using `trap - <signal>` and declare new/modified ones using `trap -- '<command>' <signal>`.
+- **Caveats**: Signal traps are bound to the process, so some traps might not make sense or could behave unexpectedly when replayed in a different shell session with different process IDs.
+
+### 3. File Creation Mask (`umask`)
+- **Save/Restore**:
+  - Save: Query using `umask -p`.
+  - Restore: Re-apply using `umask <value>` if it changes.
+- **Caveats**: None.
+
+### 4. Shell Resource Limits (`ulimit`)
+- **Save/Restore**:
+  - Save: Parse option flags and limits from `ulimit -a` (soft) and `ulimit -Ha` (hard).
+  - Restore: Apply changes via `ulimit -S <flag> <value>` or `ulimit -H <flag> <value>`.
+- **Caveats**: Non-root users cannot raise hard limits (only lower them) and cannot raise soft limits beyond the current shell's hard limits. To prevent replay scripts from failing, restore commands should be guarded (e.g., appending `2>/dev/null || true`).
+
+### 5. Current Working Directory (`cd` / `PWD`)
+- **Save/Restore**:
+  - Save: Query current path using `pwd`.
+  - Restore: Emit `cd '<path>'` if changed.
+- **Caveats**: Changing the directory upon replay might be undesirable or confusing if the user only wanted to capture environment variables/aliases and not change their current location.
+
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
