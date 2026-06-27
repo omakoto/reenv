@@ -1147,6 +1147,75 @@ EOF
 
 
 # ==========================================================
+run_test "Bind support" <<'EOF'
+# Establish baseline
+bind 'set completion-ignore-case off' 2>/dev/null
+bind '"\C-x\C-b": accept-line' 2>/dev/null
+bind '"\C-x\C-e": abort' 2>/dev/null
+
+reenv-base
+echo "base $?"
+
+# Apply changes
+bind 'set completion-ignore-case on' 2>/dev/null
+bind '"\C-x\C-a": accept-line' 2>/dev/null
+bind '"\C-x\C-b": abort' 2>/dev/null
+bind '"\C-x\C-c": "macro output"' 2>/dev/null
+bind -x '"\C-x\C-d": echo hello' 2>/dev/null
+bind -r "\C-x\C-e" 2>/dev/null
+
+reenv-cap > /tmp/reenv-test-bind.sh
+cat /tmp/reenv-test-bind.sh
+
+# Let's clean up/reset the bindings to see if the script restores them.
+bind 'set completion-ignore-case off' 2>/dev/null
+bind -r "\C-x\C-a" 2>/dev/null
+bind '"\C-x\C-b": accept-line' 2>/dev/null
+bind -r "\C-x\C-c" 2>/dev/null
+bind -r "\C-x\C-d" 2>/dev/null
+bind '"\C-x\C-e": abort' 2>/dev/null
+
+# Source the generated cap output
+. /tmp/reenv-test-bind.sh
+echo "apply $?"
+
+# Verify variables
+bind -v 2>/dev/null | grep completion-ignore-case
+# Verify bindings, macros, shell commands
+bind -p 2>/dev/null | grep -E '\\C-x\\C-[ab]'
+bind -s 2>/dev/null | grep '\\C-x\\C-c'
+bind -X 2>/dev/null | grep '\\C-x\\C-d'
+
+rm -f /tmp/reenv-test-bind.sh
+=== expected ===
+base 0
+bind -r '\C-x\C-e' 2>/dev/null
+###REENV###
+#b:key:"\C-x\C-a"
+bind '"\C-x\C-a": accept-line' 2>/dev/null
+###REENV###
+#b:key:"\C-x\C-b"
+bind '"\C-x\C-b": abort' 2>/dev/null
+###REENV###
+#b:macro:"\C-x\C-c"
+bind '"\C-x\C-c": "macro output"' 2>/dev/null
+###REENV###
+#b:var:completion-ignore-case
+bind 'set completion-ignore-case on' 2>/dev/null
+###REENV###
+#b:x:"\C-x\C-d"
+bind -x '"\C-x\C-d": echo hello' 2>/dev/null
+###REENV###
+apply 0
+set completion-ignore-case on
+"\C-x\C-b": abort
+"\C-x\C-a": accept-line
+"\C-x\C-c": "macro output"
+"\C-x\C-d" "echo hello"
+EOF
+
+
+# ==========================================================
 if (( $num_failure == 0 )) && (( $num_tests > 0 )) ; then
     green "ALL TESTS PASSED!"
     echo

@@ -279,7 +279,82 @@ function _reenv_dump() {
             echo "$line"
             echo '###REENV###'
         done
+
+        # Dump bind settings.
+        _reenv_dump_bind
     } | reenv-sort > "$_reenv_file"
+}
+
+# Dump all bind variables, key bindings, macros, and shell commands.
+function _reenv_dump_bind() {
+    {
+        echo "===VARIABLES==="
+        bind -v 2>/dev/null
+        echo "===BINDINGS==="
+        bind -p 2>/dev/null
+        echo "===MACROS==="
+        bind -s 2>/dev/null
+        echo "===SHELL_COMMANDS==="
+        bind -X 2>/dev/null
+    } | python3 -c '
+import sys, shlex
+
+section = None
+for line in sys.stdin:
+    line = line.strip()
+    if not line:
+        continue
+    if line == "===VARIABLES===":
+        section = "var"
+        continue
+    elif line == "===BINDINGS===":
+        section = "key"
+        continue
+    elif line == "===MACROS===":
+        section = "macro"
+        continue
+    elif line == "===SHELL_COMMANDS===":
+        section = "x"
+        continue
+
+    if section == "var":
+        if line.startswith("set "):
+            parts = line.split()
+            if len(parts) >= 2:
+                var_name = parts[1]
+                print(f"#b:var:{var_name}")
+                print(f"bind {shlex.quote(line)} 2>/dev/null")
+                print("###REENV###")
+    elif section == "key":
+        if line.startswith("\""):
+            parts = line.split(":", 1)
+            if len(parts) == 2:
+                keyseq = parts[0].strip()
+                print(f"#b:key:{keyseq}")
+                print(f"bind {shlex.quote(line)} 2>/dev/null")
+                print("###REENV###")
+    elif section == "macro":
+        if line.startswith("\""):
+            parts = line.split(":", 1)
+            if len(parts) == 2:
+                keyseq = parts[0].strip()
+                print(f"#b:macro:{keyseq}")
+                print(f"bind {shlex.quote(line)} 2>/dev/null")
+                print("###REENV###")
+    elif section == "x":
+        try:
+            parts = shlex.split(line)
+        except Exception:
+            parts = line.split(None, 1)
+        if len(parts) == 2:
+            keyseq = parts[0]
+            cmd = parts[1]
+            comment_keyseq = f"\"{keyseq}\"" if not keyseq.startswith("\"") else keyseq
+            print(f"#b:x:{comment_keyseq}")
+            inner = f"\"{keyseq}\": {cmd}"
+            print(f"bind -x {shlex.quote(inner)} 2>/dev/null")
+            print("###REENV###")
+'
 }
 
 # Dump all variables / etc with `unset`.
@@ -308,8 +383,60 @@ function _reenv_dump_unset() {
         complete -p 2>/dev/null | _reenv_filter_completions | while IFS=$'\t' read -r name line; do
             printf "complete -r %q\n###REENV###\n" "$name"
         done
+
+        # Dump unbind commands.
+        _reenv_dump_unbind
     } | reenv-sort > "$_reenv_file"
 }
+
+# Dump unbind commands for all currently bound key sequences.
+function _reenv_dump_unbind() {
+    {
+        echo "===BINDINGS==="
+        bind -p 2>/dev/null
+        echo "===MACROS==="
+        bind -s 2>/dev/null
+        echo "===SHELL_COMMANDS==="
+        bind -X 2>/dev/null
+    } | python3 -c '
+import sys, shlex
+
+section = None
+for line in sys.stdin:
+    line = line.strip()
+    if not line:
+        continue
+    if line == "===BINDINGS===":
+        section = "key"
+        continue
+    elif line == "===MACROS===":
+        section = "macro"
+        continue
+    elif line == "===SHELL_COMMANDS===":
+        section = "x"
+        continue
+
+    keyseq = None
+    if section in ("key", "macro") and line.startswith("\""):
+        parts = line.split(":", 1)
+        if len(parts) == 2:
+            keyseq = parts[0].strip()
+    elif section == "x":
+        try:
+            parts = shlex.split(line)
+        except Exception:
+            parts = line.split(None, 1)
+        if len(parts) >= 1:
+            keyseq = parts[0]
+
+    if keyseq:
+        if keyseq.startswith("\"") and keyseq.endswith("\"") and len(keyseq) >= 2:
+            keyseq = keyseq[1:-1]
+        print(f"bind -r {shlex.quote(keyseq)} 2>/dev/null")
+        print("###REENV###")
+'
+}
+
 
 # The actual filenames used in reenv-base and reenv-cap.
 _reenv_active_base_file=""
