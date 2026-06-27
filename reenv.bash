@@ -248,7 +248,7 @@ for line in sys.stdin:
 function _reenv_dump() {
     local _reenv_file="$1"
     if ! (( ${_reenv_quiet:-0} )) ; then
-        echo "Dumping to $_reenv_file..." 1>&2
+        echo "Dumping to $_reenv_file ..." 1>&2
     fi
     {
         # Dump variables.
@@ -287,7 +287,7 @@ function _reenv_dump() {
 function _reenv_dump_unset() {
     local _reenv_file="$1"
     if ! (( ${_reenv_quiet:-0} )) ; then
-        echo "Dumping clear commands to $_reenv_file...." 1>&2
+        echo "Dumping clear commands to $_reenv_file ...." 1>&2
     fi
     {
         compgen -v | _reenv_filter | while IFS= read -r name; do
