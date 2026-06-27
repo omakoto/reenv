@@ -256,28 +256,28 @@ function _reenv_dump() {
         compgen -v | _reenv_filter | while IFS= read -r name; do
             echo "#v:$name"
             declare -p "$name"
-            printf '###REENV###\n'
+            echo '###REENV###'
         done | sed -e 's/^declare /declare -g /'
 
         # Dump functions.
         compgen -A function | _reenv_filter | while IFS= read -r name; do
             echo "#f:$name()"
             declare -p -f "$name"
-            printf '###REENV###\n'
+            echo '###REENV###'
         done
 
         # Dump aliases.
         compgen -a | _reenv_filter | while IFS= read -r name; do
             echo "#a:$name(alias)"
             alias "$name"
-            printf '###REENV###\n'
+            echo '###REENV###'
         done
 
         # Dump completions.
         complete -p 2>/dev/null | _reenv_filter_completions | while IFS=$'\t' read -r name line; do
             echo "#c:$name(completion)"
             echo "$line"
-            printf '###REENV###\n'
+            echo '###REENV###'
         done
     } | reenv-sort > "$_reenv_file"
 }
