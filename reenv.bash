@@ -220,6 +220,30 @@ function _reenv_filter() {
     fi
 }
 
+# Filter completions using Python and output name and line separated by a tab.
+function _reenv_filter_completions() {
+    local custom_skip="${REENV_SKIP:-}"
+    python3 -c '
+import sys, re, shlex
+default_skip = re.compile(sys.argv[1])
+custom_skip = re.compile(sys.argv[2]) if sys.argv[2] else None
+for line in sys.stdin:
+    line = line.strip()
+    if not line:
+        continue
+    try:
+        args = shlex.split(line)
+        name = args[-1] if args else ""
+    except Exception:
+        name = line.split()[-1] if line.split() else ""
+    if default_skip.search(name):
+        continue
+    if custom_skip and custom_skip.search(name):
+        continue
+    sys.stdout.write(f"{name}\t{line}\n")
+' "$_reenv_default_skip" "$custom_skip"
+}
+
 # Dump all variables, functions, and aliases.
 function _reenv_dump() {
     local _reenv_file="$1"
@@ -250,15 +274,10 @@ function _reenv_dump() {
         done
 
         # Dump completions.
-        complete -p 2>/dev/null | while IFS= read -r line; do
-            local -a args
-            eval "args=( $line )"
-            local name="${args[-1]}"
-            if echo "$name" | _reenv_filter >/dev/null; then
-                echo "#c:$name(completion)"
-                echo "$line"
-                printf '###REENV###\n'
-            fi
+        complete -p 2>/dev/null | _reenv_filter_completions | while IFS=$'\t' read -r name line; do
+            echo "#c:$name(completion)"
+            echo "$line"
+            printf '###REENV###\n'
         done
     } | reenv-sort > "$_reenv_file"
 }
@@ -286,13 +305,8 @@ function _reenv_dump_unset() {
         done
 
         # completions
-        complete -p 2>/dev/null | while IFS= read -r line; do
-            local -a args
-            eval "args=( $line )"
-            local name="${args[-1]}"
-            if echo "$name" | _reenv_filter >/dev/null; then
-                printf "complete -r %q\n###REENV###\n" "$name"
-            fi
+        complete -p 2>/dev/null | _reenv_filter_completions | while IFS=$'\t' read -r name line; do
+            printf "complete -r %q\n###REENV###\n" "$name"
         done
     } | reenv-sort > "$_reenv_file"
 }
