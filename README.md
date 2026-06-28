@@ -1,6 +1,6 @@
 # reenv
 
-`reenv` is a lightweight Bash utility designed to track changes to the shell environment (variables, functions, aliases, and completions) between two points in time and serialize those changes as sourceable Bash code. 
+`reenv` is a lightweight Bash utility designed to track changes to the shell environment (variables, functions, aliases, completions, and Readline key bindings/variables) between two points in time and serialize those changes as sourceable Bash code. 
 
 This enables you to capture environment modifications (e.g., made within a subshell, a build script, or an installer) and replay them in your current shell or another shell session.
 
@@ -34,7 +34,7 @@ This enables you to capture environment modifications (e.g., made within a subsh
 # 1. Initialize baseline snapshot
 reenv-base
 
-# 2. Modify environment (variables, functions, aliases, and completions)
+# 2. Modify environment (variables, functions, aliases, completions, and Readline bindings)
 export MY_VAR="hello"
 my_func() { echo "world"; }
 alias my_alias="echo hello world"
@@ -50,7 +50,7 @@ source delta.sh
 
 ## Features
 
-- **Tracks Variables, Functions, Aliases, and Completions:** Detects new, modified, and deleted items.
+- **Tracks Variables, Functions, Aliases, Completions, and Readline Bindings:** Detects new, modified, and deleted items (including Readline key bindings, macros, variables, and shell command bindings).
 - **Preserves Export Status:** Correctly tracks and reapplies export status (`export` / `declare -x`) for variables and functions.
 - **Customizable Filter:** Easily ignore specific variables or functions using a regular expression.
 
@@ -58,8 +58,8 @@ source delta.sh
 
 `reenv` exposes two main commands:
 
-1. `reenv-base`: Captures the "before" snapshot (baseline) of all defined variables, functions, aliases, and completions.
-2. `reenv-cap`: Captures the "after" snapshot, calculates the delta from the baseline, and prints sourceable Bash code representing the difference (e.g., adding/modifying environment variables, declaring functions, unsetting removed variables).
+1. `reenv-base`: Captures the "before" snapshot (baseline) of all defined variables, functions, aliases, completions, and Readline bindings.
+2. `reenv-cap`: Captures the "after" snapshot, calculates the delta from the baseline, and prints sourceable Bash code representing the difference (e.g., adding/modifying environment variables, declaring functions, unsetting removed variables, and updating Readline bindings).
 
 ## Requirements
 
@@ -76,7 +76,7 @@ source /path/to/reenv.bash
 
 ## What is NOT Captured
 
-`reenv` only tracks shell and environment variables, functions, aliases, and completions. It does **not** capture other aspects of the shell or system state, including:
+`reenv` only tracks shell and environment variables, functions, aliases, completions, and Readline bindings. It does **not** capture other aspects of the shell or system state, including:
 
 - **System/Process State:**
   - File system changes (creation, modification, or deletion of files/directories).
