@@ -207,10 +207,19 @@ By default, `reenv` writes environment snapshots to temporary files. If you want
   ```bash
   # Calculate delta comparing custom baseline and custom current snapshot, and redirect stdout to a file
   reenv-cap -b /tmp/my_baseline -f /tmp/my_current > /tmp/delta.sh
-
-  # Alternatively, write the delta directly using the -o option
-  reenv-cap -b /tmp/my_baseline -f /tmp/my_current -o /tmp/delta.sh
   ```
+
+### Suppressing Status Messages (`-q`)
+
+You can pass the `-q` option to either `reenv-base` or `reenv-cap` to suppress status messages printed to stderr:
+
+```bash
+# Capture baseline quietly
+reenv-base -q
+
+# Capture delta quietly
+reenv-cap -q > delta.sh
+```
 
 ## Limitations
 

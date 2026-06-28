@@ -76,6 +76,28 @@ reenv: Captured baseline. Use reenv-cap to print the delta.
 0
 EOF
 
+
+# ==========================================================
+_reenv_quiet=0 run_test "Quiet base via -q" <<'EOF'
+reenv-base -q
+echo $?
+=== expected ===
+0
+EOF
+
+
+# ==========================================================
+_reenv_quiet=0 run_test "Quiet cap via -q" <<'EOF'
+reenv-base -q
+export my_test_var=changed
+reenv-cap -q > /tmp/reenv-test-quiet.sh
+echo $?
+rm -f /tmp/reenv-test-quiet.sh
+unset my_test_var
+=== expected ===
+0
+EOF
+
 # ==========================================================
 run_test "No env change" <<'EOF'
 reenv-base
@@ -448,15 +470,16 @@ This lets you capture environment changes made in one shell and replay
 them in another.
 
 Usage:
-  reenv-base [-b BASELINE_NAME]
+  reenv-base [-b BASELINE_NAME] [-q]
       Capture baseline state of the environment.
-  reenv-cap [-b BASELINE_NAME] [-f CURRENT_NAME] [-o OUTPUT_FILE]
+  reenv-cap [-b BASELINE_NAME] [-f CURRENT_NAME] [-o OUTPUT_FILE] [-q]
       Print environment delta since the baseline state.
 
 Options:
   -b BASELINE_NAME  Specify baseline snapshot name (default is temporary file)
   -f CURRENT_NAME   Specify current snapshot name (default is temporary file)
   -o OUTPUT_FILE    Write the environment delta to OUTPUT_FILE instead of stdout
+  -q                Suppress status messages
 
 See https://github.com/omakoto/reenv for more details.
 
@@ -470,15 +493,16 @@ This lets you capture environment changes made in one shell and replay
 them in another.
 
 Usage:
-  reenv-base [-b BASELINE_NAME]
+  reenv-base [-b BASELINE_NAME] [-q]
       Capture baseline state of the environment.
-  reenv-cap [-b BASELINE_NAME] [-f CURRENT_NAME] [-o OUTPUT_FILE]
+  reenv-cap [-b BASELINE_NAME] [-f CURRENT_NAME] [-o OUTPUT_FILE] [-q]
       Print environment delta since the baseline state.
 
 Options:
   -b BASELINE_NAME  Specify baseline snapshot name (default is temporary file)
   -f CURRENT_NAME   Specify current snapshot name (default is temporary file)
   -o OUTPUT_FILE    Write the environment delta to OUTPUT_FILE instead of stdout
+  -q                Suppress status messages
 
 See https://github.com/omakoto/reenv for more details.
 
@@ -492,15 +516,16 @@ This lets you capture environment changes made in one shell and replay
 them in another.
 
 Usage:
-  reenv-base [-b BASELINE_NAME]
+  reenv-base [-b BASELINE_NAME] [-q]
       Capture baseline state of the environment.
-  reenv-cap [-b BASELINE_NAME] [-f CURRENT_NAME] [-o OUTPUT_FILE]
+  reenv-cap [-b BASELINE_NAME] [-f CURRENT_NAME] [-o OUTPUT_FILE] [-q]
       Print environment delta since the baseline state.
 
 Options:
   -b BASELINE_NAME  Specify baseline snapshot name (default is temporary file)
   -f CURRENT_NAME   Specify current snapshot name (default is temporary file)
   -o OUTPUT_FILE    Write the environment delta to OUTPUT_FILE instead of stdout
+  -q                Suppress status messages
 
 See https://github.com/omakoto/reenv for more details.
 
@@ -514,15 +539,16 @@ This lets you capture environment changes made in one shell and replay
 them in another.
 
 Usage:
-  reenv-base [-b BASELINE_NAME]
+  reenv-base [-b BASELINE_NAME] [-q]
       Capture baseline state of the environment.
-  reenv-cap [-b BASELINE_NAME] [-f CURRENT_NAME] [-o OUTPUT_FILE]
+  reenv-cap [-b BASELINE_NAME] [-f CURRENT_NAME] [-o OUTPUT_FILE] [-q]
       Print environment delta since the baseline state.
 
 Options:
   -b BASELINE_NAME  Specify baseline snapshot name (default is temporary file)
   -f CURRENT_NAME   Specify current snapshot name (default is temporary file)
   -o OUTPUT_FILE    Write the environment delta to OUTPUT_FILE instead of stdout
+  -q                Suppress status messages
 
 See https://github.com/omakoto/reenv for more details.
 

@@ -24,15 +24,16 @@ This lets you capture environment changes made in one shell and replay
 them in another.
 
 Usage:
-  reenv-base [-b BASELINE_NAME]
+  reenv-base [-b BASELINE_NAME] [-q]
       Capture baseline state of the environment.
-  reenv-cap [-b BASELINE_NAME] [-f CURRENT_NAME] [-o OUTPUT_FILE]
+  reenv-cap [-b BASELINE_NAME] [-f CURRENT_NAME] [-o OUTPUT_FILE] [-q]
       Print environment delta since the baseline state.
 
 Options:
   -b BASELINE_NAME  Specify baseline snapshot name (default is temporary file)
   -f CURRENT_NAME   Specify current snapshot name (default is temporary file)
   -o OUTPUT_FILE    Write the environment delta to OUTPUT_FILE instead of stdout
+  -q                Suppress status messages
 
 See https://github.com/omakoto/reenv for more details.
 
@@ -455,9 +456,9 @@ function _reenv_parse_args() {
 
     local _reenv_options=""
     if [[ "$_reenv_cmd" == "reenv-base" ]]; then
-        _reenv_options="b:"
+        _reenv_options="b:q"
     elif [[ "$_reenv_cmd" == "reenv-cap" ]]; then
-        _reenv_options="b:f:o:"
+        _reenv_options="b:f:o:q"
     fi
 
     local _reenv_parsed
@@ -479,6 +480,10 @@ function _reenv_parse_args() {
             -o)
                 _reenv_opt_out="$2"
                 shift 2
+                ;;
+            -q)
+                _reenv_quiet=1
+                shift
                 ;;
             --)
                 shift
